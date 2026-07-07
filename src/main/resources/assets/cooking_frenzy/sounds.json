@@ -1,0 +1,44 @@
+{
+  "oven_ding": {
+    "sounds": ["cooking_frenzy:oven_ding"]
+  },
+  "customer_arrived": {
+    "sounds": ["cooking_frenzy:customer_arrived"]
+  },
+  "customer_ring_bell": {
+    "sounds": ["cooking_frenzy:customer_ring_bell"]
+  },
+  "customer_leave": {
+    "sounds": ["cooking_frenzy:customer_leave"]
+  },
+  "customer_served": {
+    "sounds": ["cooking_frenzy:customer_served"]
+  },
+  "song1": {
+    "sounds": ["cooking_frenzy:song1"]
+  },
+  "song2": {
+    "sounds": ["cooking_frenzy:song2"]
+  },
+  "song3": {
+    "sounds": ["cooking_frenzy:song3"]
+  },
+  "song4": {
+    "sounds": ["cooking_frenzy:song4"]
+  },
+  "song5": {
+    "sounds": ["cooking_frenzy:song5"]
+  },
+  "timer_end": {
+    "sounds": ["cooking_frenzy:timer_end"]
+  },
+  "drum_roll": {
+    "sounds": ["cooking_frenzy:drum_roll"]
+  },
+  "waiting": {
+    "sounds": ["cooking_frenzy:waiting"]
+  },
+  "game_over": {
+    "sounds": ["cooking_frenzy:game_over"]
+  }
+}
