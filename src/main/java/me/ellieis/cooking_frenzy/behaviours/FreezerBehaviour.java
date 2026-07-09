@@ -1,18 +1,25 @@
 package me.ellieis.cooking_frenzy.behaviours;
 
 import com.mojang.math.Transformation;
+import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
+import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
+import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.TargetBlockHit;
 import me.ellieis.cooking_frenzy.map.Active;
 import me.ellieis.cooking_frenzy.map.MapWithFreezer;
 import me.ellieis.cooking_frenzy.map.MapWithRecipeMaker;
 import me.ellieis.cooking_frenzy.scheduler.Scheduler;
 import me.ellieis.cooking_frenzy.ui.ProgressBarComponent;
+import me.ellieis.cooking_frenzy.ui.spatial.holder.DissapearingHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Display;
@@ -179,8 +186,27 @@ public class FreezerBehaviour extends BaseBehaviour {
         }
     }
 
+    private void spawnHitDisplay(boolean hitTarget, Vec3 position, Direction direction) {
+        DissapearingHolder holder = new DissapearingHolder(100);
+        MutableComponent component;
+        if (hitTarget) {
+            component = Component.literal("✓").withStyle(ChatFormatting.GREEN);
+        } else {
+            component = Component.literal("X").withStyle(ChatFormatting.RED);
+        }
+        TextDisplayElement display = new TextDisplayElement(component);
+        display.setRotation(0, direction.toYRot());
+        display.setBackground(0);
+        if (!hitTarget) {
+            display.setScale(new Vector3f(0.6f, 0.6f, 0.6f));
+        }
+        holder.addElement(display);
+        ChunkAttachment.ofTicking(holder, level, position.relative(direction, 0.1));
+    }
+
     private EventResult onTargetHit(BlockHitResult hitResult, Entity entity, int powerLevel) {
         if (powerLevel >= 6) {
+            spawnHitDisplay(true, entity.position(), hitResult.getDirection());
             for (TemplateRegion region : meatProviders) {
                 if (region.getBounds().contains(hitResult.getBlockPos())) {
                     region.getData().getString("type").ifPresent(meatType -> {
@@ -204,6 +230,10 @@ public class FreezerBehaviour extends BaseBehaviour {
                     });
                 }
             }
+        } else {
+            spawnHitDisplay(false, entity.position(), hitResult.getDirection());
+            Vec3 pos = map.getFoodDropper().getBounds().center();
+            this.level.playSound(null, BlockPos.containing(pos), SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE), SoundSource.BLOCKS, 5, 1);
         }
         return EventResult.PASS;
     }

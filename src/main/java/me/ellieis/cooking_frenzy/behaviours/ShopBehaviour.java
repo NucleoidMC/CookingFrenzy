@@ -89,11 +89,11 @@ public class ShopBehaviour extends BaseBehaviour {
                 itemQueue.add(new QueuedItem(game.time + delay, game.time, item.item()));
             } else {
                 player.sendSystemMessage(Component.translatable("cooking_frenzy.shop.queue_full").withStyle(ChatFormatting.RED), false);
-                player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 1, 1, player.level().getSeed()));
+                player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 2, 1, player.level().getSeed()));
             }
 
         } else {
-            player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 1, 1, player.level().getSeed()));
+            player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 2, 1, player.level().getSeed()));
         }
     }
 
