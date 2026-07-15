@@ -20,10 +20,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import xyz.nucleoid.fantasy.RuntimeLevelConfig;
-import xyz.nucleoid.plasmid.api.game.GameActivity;
-import xyz.nucleoid.plasmid.api.game.GameOpenContext;
-import xyz.nucleoid.plasmid.api.game.GameOpenProcedure;
-import xyz.nucleoid.plasmid.api.game.GameSpace;
+import xyz.nucleoid.plasmid.api.game.*;
 import xyz.nucleoid.plasmid.api.game.player.JoinIntent;
 import xyz.nucleoid.plasmid.api.game.rule.GameRuleType;
 import xyz.nucleoid.stimuli.event.EventResult;
@@ -67,7 +64,7 @@ public class CookingFrenzyTutorial extends CookingFrenzyPhase<Tutorial> {
 
     private InteractionResult onItemUse(ServerPlayer player, InteractionHand hand) {
         if (player.getItemInHand(hand).getItem().equals(Items.BED.red())) {
-            gameSpace.getPlayers().kick(player);
+            gameSpace.close(GameCloseReason.FINISHED);
         }
         return InteractionResult.FAIL;
     }

@@ -1,6 +1,8 @@
 {
   "gameType.cooking_frenzy.cooking_frenzy": "Cooking Frenzy",
+  "gameType.cooking_frenzy.tutorial": "Cooking Frenzy: Tutorial",
   "game.cooking_frenzy.cooking_frenzy": "Cooking Frenzy",
+  "game.cooking_frenzy.tutorial": "Cooking Frenzy: Tutorial",
 
   "cooking_frenzy.lobby.welcome": "Welcome to Cooking Frenzy, a cooking-based\nminigame where you fulfill customer orders\nCheck around the different tools you'll need to accomplish this.",
   "cooking_frenzy.lobby.farming": "You may need to grow crops\nto fullfill orders",
