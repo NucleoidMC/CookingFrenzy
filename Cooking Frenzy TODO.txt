@@ -23,3 +23,20 @@ Tidier Freezer
 Increases the amount of snowballs that can be stored to exactly 10 (single use)
 
 Debuff Ideas:
+
+
+Tutorial:
+    Order Tutorial
+        Camera shows customer walking into the store
+        Explains how to interact with customers
+        - player takes the order
+        Camera shows the order on top
+        Explains why you need to take orders
+        Explains how you get more money depending on how fast you complete orders
+    Crafter (& farming) Tutorial
+        Camera shows customer walking into the store
+        - player takes the order
+        - bread is guaranteed to be the order
+        Camera shows the order on top
+        text says how you need to farm for wheat
+        Camera goes to minecart entrance

@@ -19,6 +19,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -72,6 +74,9 @@ public class FarmingBehaviour extends BaseBehaviour {
     boolean debounce = true;
     Scheduler scheduler;
     Farmer farmer;
+    boolean isMinecartGlowing = false;
+    boolean isFarmerGlowing = false;
+    Minecart minecart;
     ArrayList<PlantInfo> plants = new ArrayList<>();
     public int cropGrowTime;
     CookingFrenzyActive game;
@@ -124,6 +129,7 @@ public class FarmingBehaviour extends BaseBehaviour {
 
         Vec3 minecartPos = game.map.getMinecartSpawn().getBounds().center();
         Minecart minecart = new Minecart(EntityTypes.MINECART, level);
+        this.minecart = minecart;
         minecart.teleportTo(level, minecartPos.x(), minecartPos.y(), minecartPos.z(), Set.of(), 0, 0, false);
 
         level.addFreshEntity(trader);
@@ -137,6 +143,14 @@ public class FarmingBehaviour extends BaseBehaviour {
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
         activity.listen(BlockDropItemsEvent.EVENT, this::droppedItemModifier);
         activity.listen(GameActivityEvents.TICK, this::onTick);
+    }
+
+    public void glowFarmer(boolean isGlowing) {
+        this.isFarmerGlowing = isGlowing;
+    }
+
+    public void glowMinecart(boolean isGlowing) {
+        this.isMinecartGlowing = isGlowing;
     }
 
     private boolean isSeed(ItemStack itemStack) {
@@ -238,6 +252,9 @@ public class FarmingBehaviour extends BaseBehaviour {
                 increasePlantAge(plant);
             }
         }
+
+        this.trader.setGlowingTag(this.isFarmerGlowing);
+        this.minecart.setGlowingTag(this.isMinecartGlowing);
     }
 
     private EventResult onEntityUse(ServerPlayer player, Entity entity, InteractionHand hand, EntityHitResult entityHitResult) {
@@ -272,9 +289,13 @@ public class FarmingBehaviour extends BaseBehaviour {
                     if (state.getValue(BlockStateProperties.AGE_2) < 2) {
                         bonemealableBlock.performBonemeal(this.level, this.level.getRandom(), info.pos(), state);
                     }
-                } else if (block instanceof StemBlock) {
+                } else if (block instanceof StemBlock stemBlock) {
                     if (state.getValue(BlockStateProperties.AGE_7) < 7) {
                         bonemealableBlock.performBonemeal(this.level, this.level.getRandom(), info.pos(), state);
+                    } else {
+                        if (!stemBlock.isValidBonemealTarget(level, info.pos(), state)){
+                            growStem(stemBlock, info.pos());
+                        }
                     }
                 }
             } else if (block instanceof SugarCaneBlock) {
@@ -353,7 +374,21 @@ public class FarmingBehaviour extends BaseBehaviour {
         });
         return DroppedItemsResult.pass(modifiedItems);
     }
-
+    private void growStem(StemBlock stemBlock, BlockPos pos) {
+        StemBlockAccessor accessor = (StemBlockAccessor) stemBlock;
+        Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(level.getRandom());
+        BlockPos relative = pos.relative(direction);
+        BlockState stateBelow = level.getBlockState(relative.below());
+        if (level.getBlockState(relative).isAir() && stateBelow.is(accessor.cooking_frenzy$getFruitSupportBlocks())) {
+            Registry<Block> blocks = level.registryAccess().lookupOrThrow(Registries.BLOCK);
+            Optional<Block> fruit = blocks.getOptional(accessor.cooking_frenzy$getFruit());
+            Optional<Block> stem = blocks.getOptional(accessor.cooking_frenzy$getAttachedStem());
+            if (fruit.isPresent() && stem.isPresent()) {
+                level.setBlockAndUpdate(relative, (fruit.get()).defaultBlockState());
+                level.setBlockAndUpdate(pos, (stem.get()).defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
+            }
+        }
+    }
     private InteractionResult onBlockUse(ServerPlayer player, InteractionHand hand, BlockHitResult hitResult) {
         ItemStack stack = player.getItemInHand(hand);
         BlockPos pos = hitResult.getBlockPos();
@@ -367,19 +402,7 @@ public class FarmingBehaviour extends BaseBehaviour {
                 return InteractionResult.FAIL;
             } else if (state.getBlock() instanceof StemBlock stemBlock) {
                 if (!stemBlock.isValidBonemealTarget(level, pos, state)){
-                    StemBlockAccessor accessor = (StemBlockAccessor) stemBlock;
-                    Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(level.getRandom());
-                    BlockPos relative = pos.relative(direction);
-                    BlockState stateBelow = level.getBlockState(relative.below());
-                    if (level.getBlockState(relative).isAir() && stateBelow.is(accessor.cooking_frenzy$getFruitSupportBlocks())) {
-                        Registry<Block> blocks = level.registryAccess().lookupOrThrow(Registries.BLOCK);
-                        Optional<Block> fruit = blocks.getOptional(accessor.cooking_frenzy$getFruit());
-                        Optional<Block> stem = blocks.getOptional(accessor.cooking_frenzy$getAttachedStem());
-                        if (fruit.isPresent() && stem.isPresent()) {
-                            level.setBlockAndUpdate(relative, (fruit.get()).defaultBlockState());
-                            level.setBlockAndUpdate(pos, (stem.get()).defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
-                        }
-                    }
+                    growStem(stemBlock, pos);
                 }
             }
         }

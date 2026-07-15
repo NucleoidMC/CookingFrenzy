@@ -4,10 +4,9 @@ import com.mojang.math.Transformation;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import me.ellieis.cooking_frenzy.CustomSounds;
-import me.ellieis.cooking_frenzy.TargetBlockHit;
-import me.ellieis.cooking_frenzy.map.Active;
+import me.ellieis.cooking_frenzy.events.MeatDispensedEvent;
+import me.ellieis.cooking_frenzy.events.TargetBlockHit;
 import me.ellieis.cooking_frenzy.map.MapWithFreezer;
-import me.ellieis.cooking_frenzy.map.MapWithRecipeMaker;
 import me.ellieis.cooking_frenzy.scheduler.Scheduler;
 import me.ellieis.cooking_frenzy.ui.ProgressBarComponent;
 import me.ellieis.cooking_frenzy.ui.spatial.holder.DissapearingHolder;
@@ -46,6 +45,7 @@ import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameOpenException;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
+import xyz.nucleoid.stimuli.Stimuli;
 import xyz.nucleoid.stimuli.event.EventResult;
 
 import java.util.List;
@@ -226,6 +226,7 @@ public class FreezerBehaviour extends BaseBehaviour {
                             Vec3 pos = map.getFoodDropper().getBounds().center();
                             this.level.addFreshEntity(new ItemEntity(this.level, pos.x(), pos.y(), pos.z(), new ItemStack(item), 0, 0, 0));
                             this.level.playSound(null, BlockPos.containing(pos), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 1, 1);
+                            Stimuli.select().at(this.level, BlockPos.containing(pos)).get(MeatDispensedEvent.EVENT).onMeatDispensed(item);
                         }
                     });
                 }

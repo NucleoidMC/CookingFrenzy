@@ -1,5 +1,10 @@
 package me.ellieis.cooking_frenzy.phases;
 
+import eu.pb4.polymer.virtualentity.api.ElementHolder;
+import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
+import eu.pb4.polymer.virtualentity.api.data.DisplayEntityData;
+import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
+import me.ellieis.cooking_frenzy.CookingFrenzy;
 import me.ellieis.cooking_frenzy.behaviours.*;
 import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
 import me.ellieis.cooking_frenzy.gamestate.GameState;
@@ -21,13 +26,18 @@ import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import xyz.nucleoid.fantasy.RuntimeLevelConfig;
 import xyz.nucleoid.map_templates.TemplateRegion;
 import xyz.nucleoid.plasmid.api.game.*;
 import xyz.nucleoid.plasmid.api.game.common.GameWaitingLobby;
+import xyz.nucleoid.plasmid.api.game.config.GameConfig;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.api.game.player.GamePlayerJoiner;
 import xyz.nucleoid.plasmid.api.game.player.JoinIntent;
 import xyz.nucleoid.plasmid.api.game.rule.GameRuleType;
+import xyz.nucleoid.plasmid.api.registry.PlasmidRegistryKeys;
+import xyz.nucleoid.plasmid.impl.game.manager.GameSpaceManagerImpl;
 import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.block.BlockBreakEvent;
 import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
@@ -41,7 +51,6 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
     TemplateRegion customerButton;
     public void phaseRules(GameActivity activity) {
         activity.allow(GameRuleType.INTERACTION);
-        activity.allow(GameRuleType.PLACE_BLOCKS);
         activity.deny(GameRuleType.CRAFTING);
         activity.allow(GameRuleType.BLOCK_DROPS);
         activity.listen(EntityDamageEvent.EVENT, (entity, source, amount) -> EventResult.DENY);
@@ -71,7 +80,7 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
         });
         new RecipeMakerBehaviour(activity.getGameSpace(), activity, level, map, false);
         new FreezerBehaviour(activity.getGameSpace(), activity, level, map, scheduler, 1, false);
-        this.customerBehaviour = new CustomerBehaviour<>(activity.getGameSpace(), activity, this, true);
+        this.customerBehaviour = new CustomerBehaviour<>(activity.getGameSpace(), activity, this, false);
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
         GameWaitingLobby.addTo(activity, config.playerConfig());
         phaseRules(activity);
@@ -85,16 +94,30 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
     }
     private void spawnFloatingText(String region, Component text) {
         Vec3 pos = map.data.getFirstRegion(region).getBounds().center();
-        Display.TextDisplay display = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, level);
-        display.setBillboardConstraints(Display.BillboardConstraints.CENTER);
-        display.setText(text);
-        display.setPos(pos);
-        level.addFreshEntity(display);
+        TextDisplayElement display = new TextDisplayElement(text);
+        display.setBillboardMode(Display.BillboardConstraints.CENTER);
+        display.setScale(new Vector3f(0.5f, 0.5f,0.5f));
+        ElementHolder holder = new ElementHolder();
+        holder.addElement(display);
+        ChunkAttachment.of(holder, level, pos);
     }
 
     private InteractionResult onBlockUse(ServerPlayer player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.getBlockState(hitResult.getBlockPos()).getBlock() instanceof LecternBlock) {
-            ShopBehaviour.openStaticShop(player);
+            if (map.getTutorialLectern().getBounds().contains(hitResult.getBlockPos())) {
+                GameSpaceManagerImpl.get().open(level.registryAccess().lookupOrThrow(PlasmidRegistryKeys.GAME_CONFIG).get(CookingFrenzy.identifier("tutorial")).orElseThrow()).handleAsync((tutorial, throwable) -> {
+                    tutorial.addPlayerFilter(playerRef -> playerRef.id().equals(player.getUUID()));
+                    if (throwable == null) {
+                        gameSpace.getPlayers().kick(player);
+                        GamePlayerJoiner.tryJoin(player, tutorial, JoinIntent.PLAY);
+                    } else {
+                        player.sendSystemMessage(Component.translatable("cooking_frenzy.tutorial.open_failed"));
+                    }
+                    return null;
+                });
+            } else {
+                ShopBehaviour.openStaticShop(player);
+            }
             return InteractionResult.FAIL;
         }
         if (customerButton.getBounds().contains(hitResult.getBlockPos())) {

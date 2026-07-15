@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.map_templates.MapTemplateMetadata;
 import xyz.nucleoid.map_templates.TemplateRegion;
 import xyz.nucleoid.plasmid.api.game.player.JoinIntent;
@@ -21,6 +22,7 @@ import xyz.nucleoid.plasmid.api.game.player.JoinIntent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, MapWithCustomer {
     CookingFrenzyActive game;
@@ -47,6 +49,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     List<TemplateRegion> animalSpawners;
     TemplateRegion traderSpawn;
     TemplateRegion minecartSpawn;
+    TemplateRegion farmingArea;
     TemplateRegion farmingPlate;
     TemplateRegion farmingBarrier;
     TemplateRegion exitDetector;
@@ -56,6 +59,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     List<TemplateRegion> multiPlayerRegions;
     GameModifiers modifiers;
     public HashMap<ServerPlayer, JoinIntent> playerIntents;
+    public TutorialCameraPositions tutorialCameraPositions;
     public Active(MinecraftServer server, GameModifiers modifiers, HashMap<ServerPlayer, JoinIntent> playerIntents, boolean debugMode) {
         super(server, CookingFrenzy.identifier("main"));
         this.modifiers = modifiers;
@@ -91,6 +95,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
         this.animalSpawners = meta.getRegions("animal_spawn").toList();
         this.traderSpawn = meta.getFirstRegion("trader_spawn");
         this.minecartSpawn = meta.getFirstRegion("minecart_spawn");
+        this.farmingArea = meta.getFirstRegion("farming_area");
         this.farmingPlate = meta.getFirstRegion("farming_plate");
         this.farmingBarrier = meta.getFirstRegion("farming_barrier");
         this.exitDetector = meta.getFirstRegion("farming_exit_detector");
@@ -98,6 +103,19 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
         this.shopDrop = meta.getFirstRegion("shop_drop");
         this.singlePlayerRegions = meta.getRegions("single_player").toList();
         this.multiPlayerRegions = meta.getRegions("multi_player").toList();
+        this.tutorialCameraPositions = new TutorialCameraPositions(posFromMarker("customer_camera_angle"),
+                posFromMarker("crafter_camera_angle"),
+                posFromMarker("furnace_camera_angle"),
+                posFromMarker("shop_camera_angle"),
+                posFromMarker("freezer_outside_camera_angle"),
+                posFromMarker("freezer_inside_camera_angle"),
+                posFromMarker("freezer_target_camera_angle"),
+                posFromMarker("farming_outside_camera_angle"),
+                posFromMarker("trader_camera_angle"));
+    }
+
+    CamPos posFromMarker(String marker) {
+        return new CamPos(Objects.requireNonNull(this.template.getMetadata().getFirstRegion(marker)));
     }
 
     public void setGame(CookingFrenzyActive game) {
@@ -141,7 +159,6 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
             return this.furnaces;
         }
     }
-
     // freezer
     public List<TemplateRegion> getMeatProviders() {
         return this.meatProviders;
@@ -168,10 +185,11 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     public List<TemplateRegion> getAnimalSpawners() { return this.animalSpawners; }
     public TemplateRegion getTraderSpawn() { return this.traderSpawn; }
     public TemplateRegion getMinecartSpawn() { return this.minecartSpawn; }
+    public TemplateRegion getFarmingArea() { return this.farmingArea; }
     public TemplateRegion getFarmingPlate() { return this.farmingPlate; }
     public TemplateRegion getFarmingBarrier() { return this.farmingBarrier; }
     public TemplateRegion getExitDetector() { return this.exitDetector; }
-
+    public boolean isInFarmingArea(ServerPlayer player) { return this.farmingArea.getBounds().contains(player.blockPosition()); }
     public TemplateRegion getShopDrop() { return this.shopDrop; }
     public List<TemplateRegion> getSinglePlayerRegions() { return this.singlePlayerRegions; }
     public List<TemplateRegion> getMultiPlayerRegions() { return this.multiPlayerRegions; }
@@ -190,6 +208,14 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
             player.getFoodData().setSaturation(5);
         } else {
             player.setGameMode(GameType.SPECTATOR);
+        }
+    }
+    public record TutorialCameraPositions(CamPos customer, CamPos crafter, CamPos furnace, CamPos shop, CamPos freezerOutside, CamPos freezerInside, CamPos freezerTarget, CamPos farmingOutside, CamPos farmingTrader) {
+
+    }
+    public record CamPos(Vec3 pos, float pitch, float yaw) {
+        public CamPos(TemplateRegion region) {
+            this(region.getBounds().center(), region.getData().getFloatOr("pitch", 0), region.getData().getFloatOr("yaw", 0));
         }
     }
 }

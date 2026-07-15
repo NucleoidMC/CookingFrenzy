@@ -5,6 +5,7 @@ import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
 import me.ellieis.cooking_frenzy.map.Map;
 import me.ellieis.cooking_frenzy.phases.CookingFrenzyLobby;
 import me.ellieis.cooking_frenzy.phases.CookingFrenzyPhase;
+import me.ellieis.cooking_frenzy.phases.CookingFrenzyTutorial;
 import me.ellieis.cooking_frenzy.textures.GuiTextures;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.Identifier;
@@ -22,6 +23,7 @@ public class CookingFrenzy implements ModInitializer {
     @Override
     public void onInitialize() {
         GameTypes.register(CookingFrenzy.identifier("cooking_frenzy"), CookingFrenzyConfig.CODEC, CookingFrenzyLobby::Open);
+        GameTypes.register(CookingFrenzy.identifier("tutorial"), CookingFrenzyConfig.CODEC, CookingFrenzyTutorial::Open);
         PolymerResourcePackUtils.addModAssets(MOD_ID);
         GuiTextures.register();
     }

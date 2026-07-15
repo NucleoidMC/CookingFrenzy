@@ -3,6 +3,8 @@ package me.ellieis.cooking_frenzy.behaviours.extra;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.behaviours.CustomerBehaviour;
+import me.ellieis.cooking_frenzy.events.CustomerOrderTakenEvent;
+import me.ellieis.cooking_frenzy.events.CustomerSitEvent;
 import me.ellieis.cooking_frenzy.gamestate.orders.BaseOrder;
 import me.ellieis.cooking_frenzy.gamestate.orders.Orders;
 import me.ellieis.cooking_frenzy.mixins.MannequinAccessor;
@@ -27,6 +29,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
+import xyz.nucleoid.stimuli.Stimuli;
+import xyz.nucleoid.stimuli.event.EventResult;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -96,6 +100,7 @@ public class Customer {
         this.timeoutBar.setBillboardConstraints(Display.BillboardConstraints.CENTER);
         this.timeoutBar.setBackgroundColor(0);
         this.level.addFreshEntity(this.timeoutBar);
+        Stimuli.select().forEntity(this.entity).get(CustomerSitEvent.EVENT).onCustomerSit(this);
     }
 
     private void sitUp() {
@@ -216,7 +221,7 @@ public class Customer {
                 } else {
                     this.timeoutBar.teleportTo(this.level, this.entity.getX(), this.entity.getY() - 3, this.entity.getZ(), Set.of(), 0, 0, false);
                 }
-                this.entity.setXRot(mapRange(this.timeout, 0, limit, 75, 0));
+                this.entity.setXRot(mapRange(Math.min(this.timeout, limit), 0, limit, 75, 0));
                 this.timeoutBar.setText(ProgressBarComponent.create(6, this.timeout, 0, limit, true));
             }
         }
@@ -231,6 +236,10 @@ public class Customer {
         if (hasReachedSeat && interactible) {
             if (this.currentOrder == null) {
                 this.currentOrder = Orders.random(this.recipeTier, level.getRandom());
+                var result = Stimuli.select().forEntity(this.entity).get(CustomerOrderTakenEvent.EVENT).onCustomerOrderTaken(this, currentOrder);
+                if (result.result() != EventResult.PASS) {
+                    this.currentOrder = result.order();
+                }
                 if (!this.behaviour.firstOrderSet) {
                     this.behaviour.firstOrderSet = true;
                     this.behaviour.firstOrder = this.currentOrder;
@@ -256,7 +265,7 @@ public class Customer {
                     this.setScore((Math.round((60 * Math.max(0.5f, ((float) this.timeout / timeLimit))))));
                     this.timeoutBar.remove(Entity.RemovalReason.KILLED);
                     sitUp();
-                    this.behaviour.onCustomerServed();
+                    this.behaviour.onCustomerServed(this);
                 }
             }
         }

@@ -4,6 +4,7 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.behaviours.extra.ShopItem;
+import me.ellieis.cooking_frenzy.events.ItemBuyEvent;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.BaseUpgrade;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.ShopIncreaseDebuff;
@@ -32,6 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
+import xyz.nucleoid.stimuli.Stimuli;
 import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
 
 import java.util.ArrayList;
@@ -87,6 +89,7 @@ public class ShopBehaviour extends BaseBehaviour {
                     delay = itemDelay;
                 }
                 itemQueue.add(new QueuedItem(game.time + delay, game.time, item.item()));
+                Stimuli.select().forEntity(player).get(ItemBuyEvent.EVENT).onItemBought(itemStack.getDefaultInstance());
             } else {
                 player.sendSystemMessage(Component.translatable("cooking_frenzy.shop.queue_full").withStyle(ChatFormatting.RED), false);
                 player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 2, 1, player.level().getSeed()));

@@ -6,7 +6,7 @@ import net.minecraft.network.chat.MutableComponent;
 
 public class ProgressBarComponent {
     public static MutableComponent create(int textWidth, float val, float minVal, float maxVal, boolean showBackground, ChatFormatting progressColor, ChatFormatting backgroundColor) {
-        int progressCharacterCount = Math.round(Common.mapRange(val, minVal, maxVal, 0, textWidth));
+        int progressCharacterCount = Math.round(Common.mapRange(Math.min(val, maxVal), minVal, maxVal, 0, textWidth));
         StringBuilder progressBarText = new StringBuilder();
         progressBarText.repeat("▄", Math.max(0, progressCharacterCount));
         if (!showBackground) {

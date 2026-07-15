@@ -3,6 +3,7 @@ package me.ellieis.cooking_frenzy.behaviours.extra;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import me.ellieis.cooking_frenzy.CustomSounds;
+import me.ellieis.cooking_frenzy.events.ItemBuyEvent;
 import me.ellieis.cooking_frenzy.phases.CookingFrenzyActive;
 import me.ellieis.cooking_frenzy.textures.GuiTextures;
 import net.minecraft.core.Holder;
@@ -17,6 +18,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import xyz.nucleoid.stimuli.Stimuli;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +83,7 @@ public class Farmer {
         if (game.gameState.money() - game.minMoney >= item.price()) {
             game.gameState = game.gameState.decrementMoney(item.price());
             ItemStack itemStack = item.item().copy();
+            Stimuli.select().forEntity(player).get(ItemBuyEvent.EVENT).onItemBought(itemStack.copy());
             if (!player.getInventory().add(itemStack)) {
                 player.level().addFreshEntity(new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), itemStack));
             }

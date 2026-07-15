@@ -36,6 +36,8 @@ public class Lobby extends Map implements MapWithRecipeMaker, MapWithFreezer, Ma
     // recipe makers
     ArrayList<RecipeMaker> crafters = new ArrayList<>();
     ArrayList<RecipeMaker> furnaces = new ArrayList<>();
+
+    TemplateRegion tutorialLectern;
     public Lobby(MinecraftServer server, GameModifiers modifiers, boolean debugMode) {
         super(server, CookingFrenzy.identifier("lobby"));
         this.data = this.template.getMetadata();
@@ -63,6 +65,8 @@ public class Lobby extends Map implements MapWithRecipeMaker, MapWithFreezer, Ma
         this.customerNodes = data.getRegions("customer_node").toList();
         this.seats = data.getRegions("seat").toList();
         this.customerLights = data.getFirstRegion("customer_light");
+
+        this.tutorialLectern = data.getFirstRegion("tutorial_lectern");
     }
 
     public ArrayList<RecipeMaker> getRecipeMakers(RecipeMaker.RecipeMakerType type) {
@@ -93,8 +97,9 @@ public class Lobby extends Map implements MapWithRecipeMaker, MapWithFreezer, Ma
     public List<TemplateRegion> getCustomerSpawns() { return this.customerSpawns; }
     public List<TemplateRegion> getCustomerNodes() { return this.customerNodes; }
     public List<TemplateRegion> getSeats() { return this.seats; }
-    public TemplateRegion getCustomerLights() { return customerLights; }
+    public TemplateRegion getCustomerLights() { return this.customerLights; }
 
+    public TemplateRegion getTutorialLectern() { return this.tutorialLectern; }
     @Override
     public void postSpawn(ServerLevel level, ServerPlayer player, TemplateRegion spawn) {
         player.setGameMode(GameType.SURVIVAL);

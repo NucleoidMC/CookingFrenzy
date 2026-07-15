@@ -1,4 +1,4 @@
-package me.ellieis.cooking_frenzy;
+package me.ellieis.cooking_frenzy.events;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.BlockHitResult;

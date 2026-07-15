@@ -2,7 +2,7 @@ package me.ellieis.cooking_frenzy.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import me.ellieis.cooking_frenzy.TargetBlockHit;
+import me.ellieis.cooking_frenzy.events.TargetBlockHit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.TargetBlock;

@@ -2,6 +2,9 @@ package me.ellieis.cooking_frenzy.behaviours;
 
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.behaviours.extra.Customer;
+import me.ellieis.cooking_frenzy.events.CustomerOrderTakenEvent;
+import me.ellieis.cooking_frenzy.events.CustomerServedEvent;
+import me.ellieis.cooking_frenzy.events.CustomerSpawnEvent;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.orders.BaseOrder;
 import me.ellieis.cooking_frenzy.map.Active;
@@ -35,6 +38,7 @@ import xyz.nucleoid.map_templates.TemplateRegion;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
+import xyz.nucleoid.stimuli.Stimuli;
 import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.entity.EntityUseEvent;
 
@@ -54,13 +58,13 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
     public int customerTimeout;
     public boolean firstOrderSet = false;
     public BaseOrder firstOrder = null;
-    boolean isLobby;
-    public CustomerBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyPhase<T> game, int timeForCustomerSpawn, int customerTimeout, boolean isLobby) {
+    boolean spawnCustomersAutomatically;
+    public CustomerBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyPhase<T> game, int timeForCustomerSpawn, int customerTimeout, boolean spawnCustomersAutomatically) {
         super(gameSpace, activity, game.debugMode);
         this.map = (MapWithCustomer) game.map;
         this.game = game;
         this.customerLights = map.getCustomerLights();
-        this.isLobby = isLobby;
+        this.spawnCustomersAutomatically = spawnCustomersAutomatically;
         GameModifiers modifiers = this.game.gameState.currentModifiers();
         this.timeForCustomerSpawn = Math.round(timeForCustomerSpawn / modifiers.getModifier(GameModifiers.customerSpawnRateMultiplier));
         this.customerTimeout = Math.round(customerTimeout / modifiers.getModifier(GameModifiers.customerWaitingAngerRateMultiplier));
@@ -84,12 +88,12 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
 
             this.nodes.add(new Node(nodeRegion.getData().getInt("step").orElseThrow(), seatIds, nodeRegion.getBounds().centerBottom()));
         }
-        if (!this.isLobby) {
+        if (this.spawnCustomersAutomatically) {
             this.spawnCustomer(true);
         }
     }
-    public CustomerBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyPhase<T> game, boolean isLobby) {
-        this(gameSpace, activity, game, SharedConstants.TICKS_PER_MINUTE - ((Math.min(30, 5 * game.gameState.dayCount()) * SharedConstants.TICKS_PER_SECOND)), (90 - (2 * game.gameState.dayCount())) * SharedConstants.TICKS_PER_SECOND, isLobby);
+    public CustomerBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyPhase<T> game, boolean spawnCustomersAutomatically) {
+        this(gameSpace, activity, game, SharedConstants.TICKS_PER_MINUTE - ((Math.min(30, 5 * game.gameState.dayCount()) * SharedConstants.TICKS_PER_SECOND)), (90 - (2 * game.gameState.dayCount())) * SharedConstants.TICKS_PER_SECOND, spawnCustomersAutomatically);
     }
     void setupEvents() {
         activity.listen(GameActivityEvents.TICK, this::onTick);
@@ -164,7 +168,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         }
 
         if (this.timeSinceLastCustomer  >= this.timeForCustomerSpawn) {
-            if (this.isLobby) {
+            if (!this.spawnCustomersAutomatically) {
                 return;
             }
             this.spawnCustomer(true);
@@ -270,6 +274,9 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         }
         GameModifiers modifiers = this.game.gameState.currentModifiers();
         Customer customer = new Customer(path, this.game.level, spawn, this, modifiers.getModifier(GameModifiers.customerWaitingAngerRateMultiplier), modifiers.getModifier(GameModifiers.customerOrderAngerRateMultiplier), seat, this.game.gameState.tier(), profile);
+        if (Stimuli.select().forEntity(customer.entity).get(CustomerSpawnEvent.EVENT).onCustomerSpawn(customer) == EventResult.DENY) {
+            return;
+        }
         customer.advanceNode(false);
         customers.add(customer);
         setSeat(seat.setHasCustomer(true));
@@ -306,7 +313,8 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         return steps;
     }
 
-    public void onCustomerServed() {
+    public void onCustomerServed(Customer customer) {
+        Stimuli.select().forEntity(customer.entity).get(CustomerServedEvent.EVENT).onCustomerServed(customer);
         for (ServerPlayer player : this.gameSpace.getPlayers()) {
             player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_SERVED)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 1, 1, player.level().getSeed()));
         }

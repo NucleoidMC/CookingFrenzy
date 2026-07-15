@@ -1,5 +1,6 @@
 package me.ellieis.cooking_frenzy.gamestate;
 
+import me.ellieis.cooking_frenzy.events.ItemCraftedEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.entity.CrafterBlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
+import xyz.nucleoid.stimuli.Stimuli;
 
 public class Crafter extends RecipeMaker {
     public Crafter(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, FrontAndTop orientation, int timer, float timerMultiplier, boolean debugMode) {
@@ -37,6 +39,7 @@ public class Crafter extends RecipeMaker {
                     }
                     level.setBlock(this.buttonPos, Blocks.SPRUCE_BUTTON.defaultBlockState().setValue(BlockStateProperties.POWERED, false).setValue(HorizontalDirectionalBlock.FACING, this.orientation.front()), 2);
                     level.playSound(null, this.position, SoundEvents.ARROW_SHOOT, SoundSource.BLOCKS, 1, 1.8f);
+                    Stimuli.select().at(level, this.position).get(ItemCraftedEvent.EVENT).onItemCrafted(recipe);
                 }
             });
         });

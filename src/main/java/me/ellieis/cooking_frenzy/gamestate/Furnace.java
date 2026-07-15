@@ -1,6 +1,7 @@
 package me.ellieis.cooking_frenzy.gamestate;
 
 import me.ellieis.cooking_frenzy.CustomSounds;
+import me.ellieis.cooking_frenzy.events.FoodCookedEvent;
 import me.ellieis.cooking_frenzy.mixins.AbstractFurnaceBlockEntityAccessor;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
+import xyz.nucleoid.stimuli.Stimuli;
 
 public class Furnace extends RecipeMaker {
     public Furnace(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, FrontAndTop orientation, int timer, float timerMultiplier, boolean debugMode) {
@@ -43,6 +45,7 @@ public class Furnace extends RecipeMaker {
                     level.setBlock(this.position, Blocks.FURNACE.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, orientation.front()).setValue(BlockStateProperties.LIT, false), 2);
                     level.playSound(null, this.position, SoundEvents.ARROW_SHOOT, SoundSource.BLOCKS, 1, 1.8f);
                     level.playSound(null, this.position, SoundEvent.createVariableRangeEvent(CustomSounds.OVEN_DING), SoundSource.BLOCKS, 1, 1);
+                    Stimuli.select().at(level, this.position).get(FoodCookedEvent.EVENT).onFoodCooked(recipe);
                 }
             });
         });
