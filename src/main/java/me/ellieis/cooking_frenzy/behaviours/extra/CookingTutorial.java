@@ -11,6 +11,7 @@ import me.ellieis.cooking_frenzy.scheduler.Task;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
@@ -56,12 +57,13 @@ public class CookingTutorial extends BaseTutorial {
                 orderTaken = true;
                 tutorial.sendTutorialMessage(Component.translatable("cooking_frenzy.tutorial.customer_arrived.order_taken", Items.COOKED_CHICKEN.getDefaultInstance().getItemName()));
                 scheduler.addTask(new Task(game.time + (SharedConstants.TICKS_PER_SECOND * 4), () -> {
+                    Vec3 oldPos = tutorial.player.position();
                     tutorial.sendTutorialMessage(Component.translatable("cooking_frenzy.tutorial.freezer.outside"));
-                    tutorial.setCameraAngle(map.tutorialCameraPositions.freezerOutside(), 5 * SharedConstants.TICKS_PER_SECOND);
+                    tutorial.setCameraAngle(map.tutorialCameraPositions.freezerOutside(), 5 * SharedConstants.TICKS_PER_SECOND, oldPos);
                     scheduler.addTask(new Task(game.time + (SharedConstants.TICKS_PER_SECOND * 5), () -> {
-                        tutorial.setCameraAngle(map.tutorialCameraPositions.freezerInside(), 5 * SharedConstants.TICKS_PER_SECOND);
+                        tutorial.setCameraAngle(map.tutorialCameraPositions.freezerInside(), 5 * SharedConstants.TICKS_PER_SECOND, oldPos);
                         scheduler.addTask(new Task(game.time + (SharedConstants.TICKS_PER_SECOND * 5), () -> {
-                            tutorial.setCameraAngle(map.tutorialCameraPositions.freezerTarget(), SharedConstants.TICKS_PER_SECOND * 4);
+                            tutorial.setCameraAngle(map.tutorialCameraPositions.freezerTarget(), SharedConstants.TICKS_PER_SECOND * 4, oldPos);
                             tutorial.sendTutorialMessage(Component.translatable("cooking_frenzy.tutorial.freezer.target"));
                             activity.listen(ItemPickupEvent.EVENT, (player, itemEntity, meat) -> {
                                 if (meat.getItem().equals(Items.CHICKEN) && !targetHit) {

@@ -39,7 +39,7 @@ import java.util.Set;
 public class TutorialBehaviour extends BaseBehaviour {
     CookingFrenzyActive game;
     Active map;
-    ServerPlayer player;
+    public ServerPlayer player;
     Vec3 oldPlayerPos;
     TutorialType currentTutorial;
     CustomerBehaviour<Active> customerBehaviour;
@@ -69,9 +69,13 @@ public class TutorialBehaviour extends BaseBehaviour {
     }
 
     public void setCameraAngle(Active.CamPos camera, long time) {
+        setCameraAngle(camera, time, player.position());
+    }
+
+    public void setCameraAngle(Active.CamPos camera, long time, Vec3 oldPlayerPos) {
         currentCamera = camera;
         timeUntilAngleEnds = time;
-        oldPlayerPos = player.position();
+        this.oldPlayerPos = oldPlayerPos;
     }
 
     public void sendTutorialMessage(Component text) {

@@ -139,26 +139,6 @@ public class CraftingTutorial extends BaseTutorial {
         }
     }
 
-    /*
-    tutorial.sendTutorialMessage(Component.translatable("cooking_frenzy.tutorial.cook"));
-                                    tutorial.setCameraAngle(map.tutorialCameraPositions.furnace(), 5 * SharedConstants.TICKS_PER_SECOND);
-                                    scheduler.addTask(new Task(game.time + (SharedConstants.TICKS_PER_SECOND * 2), () -> {
-                                        tutorial.sendTutorialMessage(Component.translatable("cooking_frenzy.tutorial.cook.additional"));
-                                    }));
-                                    activity.listen(FoodCookedEvent.EVENT, (item) -> {
-                                        if (item.getItem().equals(Items.COOKED_CHICKEN) && !chickenCooked) {
-                                            breadCrafted = true;
-                                            tutorial.sendTutorialMessage(Component.translatable("cooking_frenzy.tutorial.serve_order"));
-                                            activity.listen(CustomerServedEvent.EVENT, (__customer) -> {
-                                                orderServed = true;
-                                                tutorial.sendTutorialMessage(Component.translatable("cooking_frenzy.tutorial.order_served"));
-                                                scheduler.addTask(new Task(game.time + (SharedConstants.TICKS_PER_SECOND * 5), () -> {
-                                                    tutorial.endCurrentTutorial();
-                                                }));
-                                            });
-                                        }
-                                    });
-     */
     public void startTutorial() {
         stallingCamera = true;
         tutorial.setCameraAngle(map.tutorialCameraPositions.customer(), 999);
