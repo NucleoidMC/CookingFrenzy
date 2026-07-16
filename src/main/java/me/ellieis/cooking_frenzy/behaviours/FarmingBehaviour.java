@@ -19,8 +19,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -114,7 +112,7 @@ public class FarmingBehaviour extends BaseBehaviour {
                 LivingEntity animal = null;
                 if (entityType == EntityTypes.CHICKEN) {
                     animal = new Chicken((EntityType<? extends Chicken>) entityType, level);
-                } else if (entityType == EntityTypes.COW) {
+                } else {
                     animal = new Cow((EntityType<? extends Cow>) entityType, level);
                 }
                 Vec3 pos = animalSpawner.getBounds().center();
@@ -398,16 +396,17 @@ public class FarmingBehaviour extends BaseBehaviour {
             return InteractionResult.PASS;
         }
         if (stack.getItem().equals(Items.BONE_MEAL)) {
-            if (state.getBlock().equals(Blocks.GRASS_BLOCK)) {
+            if (state.getBlock().equals(Blocks.GRASS_BLOCK) || state.getBlock().equals(Blocks.SHORT_GRASS)) {
                 return InteractionResult.FAIL;
             } else if (state.getBlock() instanceof StemBlock stemBlock) {
                 if (!stemBlock.isValidBonemealTarget(level, pos, state)){
                     growStem(stemBlock, pos);
+                    stack.shrink(1);
                 }
             }
         }
 
         return InteractionResult.PASS;
     }
-    record PlantInfo(BlockPos pos, long tickPlaced) { };
+    record PlantInfo(BlockPos pos, long tickPlaced) { }
 }
