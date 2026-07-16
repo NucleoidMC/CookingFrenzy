@@ -2,11 +2,11 @@ package me.ellieis.cooking_frenzy.phases;
 
 import eu.pb4.polymer.virtualentity.api.ElementHolder;
 import eu.pb4.polymer.virtualentity.api.attachment.ChunkAttachment;
-import eu.pb4.polymer.virtualentity.api.data.DisplayEntityData;
 import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import me.ellieis.cooking_frenzy.CookingFrenzy;
 import me.ellieis.cooking_frenzy.behaviours.*;
 import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
+import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.GameState;
 import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
 import me.ellieis.cooking_frenzy.map.Lobby;
@@ -19,7 +19,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LecternBlock;
@@ -31,7 +30,6 @@ import xyz.nucleoid.fantasy.RuntimeLevelConfig;
 import xyz.nucleoid.map_templates.TemplateRegion;
 import xyz.nucleoid.plasmid.api.game.*;
 import xyz.nucleoid.plasmid.api.game.common.GameWaitingLobby;
-import xyz.nucleoid.plasmid.api.game.config.GameConfig;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
 import xyz.nucleoid.plasmid.api.game.player.GamePlayerJoiner;
 import xyz.nucleoid.plasmid.api.game.player.JoinIntent;
@@ -43,8 +41,6 @@ import xyz.nucleoid.stimuli.event.block.BlockBreakEvent;
 import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
 import xyz.nucleoid.stimuli.event.entity.EntityDamageEvent;
 
-import java.util.HashMap;
-
 public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
     Scheduler scheduler;
     CustomerBehaviour<Lobby> customerBehaviour;
@@ -53,7 +49,7 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
         activity.allow(GameRuleType.INTERACTION);
         activity.deny(GameRuleType.CRAFTING);
         activity.allow(GameRuleType.BLOCK_DROPS);
-        activity.listen(EntityDamageEvent.EVENT, (entity, source, amount) -> EventResult.DENY);
+        activity.listen(EntityDamageEvent.EVENT, (_entity, _source, _amount) -> EventResult.DENY);
     }
     public CookingFrenzyLobby(CookingFrenzyConfig config, GameActivity activity, ServerLevel level, Lobby map) {
         super(config, activity, level, map, GameState.defaultGameState());
@@ -70,7 +66,7 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
         for (RecipeMaker recipeMaker : map.getRecipeMakers(RecipeMaker.RecipeMakerType.FURNACE)) {
             recipeMaker.unlock(level);
         }
-        activity.listen(BlockBreakEvent.EVENT, (ServerPlayer player, ServerLevel _level, BlockPos pos) -> {
+        activity.listen(BlockBreakEvent.EVENT, (ServerPlayer _player, ServerLevel _level, BlockPos pos) -> {
             Block block = level.getBlockState(pos).getBlock();
             if (FarmingBehaviour.isPlant(block) || block.equals(Blocks.MELON) || block.equals(Blocks.PUMPKIN)) {
                 return EventResult.PASS;
@@ -79,7 +75,7 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
             }
         });
         new RecipeMakerBehaviour(activity.getGameSpace(), activity, level, map, false);
-        new FreezerBehaviour(activity.getGameSpace(), activity, level, map, scheduler, 1, false);
+        new FreezerBehaviour(activity.getGameSpace(), activity, level, map, scheduler, new GameModifiers(), false);
         this.customerBehaviour = new CustomerBehaviour<>(activity.getGameSpace(), activity, this, false);
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
         GameWaitingLobby.addTo(activity, config.playerConfig());
@@ -131,8 +127,6 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
         MinecraftServer server = context.server();
         Lobby map = new Lobby(server, GameState.defaultGameState().currentModifiers(), config.debugMode());
         RuntimeLevelConfig levelConfig = new RuntimeLevelConfig().setGenerator(map.asChunkGenerator());
-        return context.openWithLevel(levelConfig, (activity, level) -> {
-           new CookingFrenzyLobby(config, activity, level, map);
-        });
+        return context.openWithLevel(levelConfig, (activity, level) -> new CookingFrenzyLobby(config, activity, level, map));
     }
 }

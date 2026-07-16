@@ -2,10 +2,10 @@ package me.ellieis.cooking_frenzy.phases;
 
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
+import me.ellieis.cooking_frenzy.behaviours.SongBehaviour;
 import me.ellieis.cooking_frenzy.behaviours.TutorialBehaviour;
 import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
 import me.ellieis.cooking_frenzy.gamestate.GameState;
-import me.ellieis.cooking_frenzy.map.Lobby;
 import me.ellieis.cooking_frenzy.map.Tutorial;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -34,9 +34,10 @@ import java.util.HashMap;
 public class CookingFrenzyTutorial extends CookingFrenzyPhase<Tutorial> {
     public CookingFrenzyTutorial(CookingFrenzyConfig config, GameActivity activity, ServerLevel level, Tutorial map, GameState state) {
         super(config, activity, level, map, state);
-        activity.listen(ItemThrowEvent.EVENT, (player, slot, item) -> EventResult.DENY);
+        activity.listen(ItemThrowEvent.EVENT, (_player, _slot, _item) -> EventResult.DENY);
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
         activity.listen(ItemUseEvent.EVENT, this::onItemUse);
+        new SongBehaviour(activity.getGameSpace(), activity, false, true);
         for (ServerPlayer player : gameSpace.getPlayers()) {
             player.getInventory().clearContent();
             ItemStack itemStack = new ItemStack(Items.BED.red());
@@ -49,17 +50,8 @@ public class CookingFrenzyTutorial extends CookingFrenzyPhase<Tutorial> {
         Tutorial map = new Tutorial(gameSpace.getServer());
         RuntimeLevelConfig levelConfig = new RuntimeLevelConfig().setGenerator(map.asChunkGenerator());
         ServerLevel level = gameSpace.getLevels().add(levelConfig);
-        super(config, activity, level, map, state);
+        this(config, activity, level, map, state);
         this.playerIntents = playerIntents;
-        activity.listen(ItemThrowEvent.EVENT, (player, slot, item) -> EventResult.DENY);
-        activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
-        activity.listen(ItemUseEvent.EVENT, this::onItemUse);
-        for (ServerPlayer player : gameSpace.getPlayers()) {
-            player.getInventory().clearContent();
-            ItemStack itemStack = new ItemStack(Items.BED.red());
-            itemStack.set(DataComponents.CUSTOM_NAME, Component.translatable("text.plasmid.game.waiting_lobby.leave_game"));
-            player.getInventory().add(8, itemStack);
-        }
     }
 
     private InteractionResult onItemUse(ServerPlayer player, InteractionHand hand) {
@@ -100,7 +92,7 @@ public class CookingFrenzyTutorial extends CookingFrenzyPhase<Tutorial> {
         activity.deny(GameRuleType.PLACE_BLOCKS);
         activity.deny(GameRuleType.CRAFTING);
         activity.deny(GameRuleType.BLOCK_DROPS);
-        activity.listen(EntityDamageEvent.EVENT, (entity, source, amount) -> EventResult.DENY);
+        activity.listen(EntityDamageEvent.EVENT, (_entity, _source, _amount) -> EventResult.DENY);
     }
 
     public static void Open(GameSpace gameSpace, CookingFrenzyConfig config, GameState state, HashMap<ServerPlayer, JoinIntent> playerIntents) {
@@ -111,8 +103,6 @@ public class CookingFrenzyTutorial extends CookingFrenzyPhase<Tutorial> {
         MinecraftServer server = context.server();
         Tutorial map = new Tutorial(server);
         RuntimeLevelConfig levelConfig = new RuntimeLevelConfig().setGenerator(map.asChunkGenerator());
-        return context.openWithLevel(levelConfig, (activity, level) -> {
-            new CookingFrenzyTutorial(config, activity, level, map, GameState.defaultGameState());
-        });
+        return context.openWithLevel(levelConfig, (activity, level) -> new CookingFrenzyTutorial(config, activity, level, map, GameState.defaultGameState()));
     }
 }

@@ -82,6 +82,13 @@
   "cooking_frenzy.debuffs.pricier_upgrades.desc": "Aumenta o preço de todos os futuros upgrades em 10%%",
   "cooking_frenzy.debuffs.random_shop_item_expensive": "Taxas de importação",
   "cooking_frenzy.debuffs.random_shop_item_expensive.desc": "Um item aleatório da loja fica 25%% mais caro",
+  "cooking_frenzy.debuffs.target_hit_precision": "Alvos mais precisos",
+  "cooking_frenzy.debuffs.target_hit_precision.desc": "Aumenta o quão preciso você precisa ser para ganhar carne no Freezer",
+  "cooking_frenzy.debuffs.freezer_damage": "Congelamento",
+  "cooking_frenzy.debuffs.freezer_damage.desc": "Receba meio coração a mais de dano no Freezer",
+  "cooking_frenzy.debuffs.shop_delivery_speed_increase": "Erros de Entrega",
+  "cooking_frenzy.debuffs.shop_delivery_speed_increase.desc": "Aumenta o tempo de entrega da Loja em 20%%",
+
   "cooking_frenzy.setup.day_starting": "Começando novo dia em %s",
   "cooking_frenzy.setup.exit": "Parar de Jogar",
   "cooking_frenzy.active.day_end": "Tempo acabou!"

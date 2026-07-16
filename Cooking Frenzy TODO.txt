@@ -1,5 +1,4 @@
 Cooking Frenzy TODO:
-Actual Lobby Map (might involve custom waiting lobby implementation tbh)
 Sheep pen to have recipes with mutton
 
 QOL:
@@ -11,7 +10,6 @@ Temporary upgrade shop?
 Would work like the farmer, but instead you can buy temporary upgrades during the day for an increased amount of money. idk if it would fit tho
 Freezer malfunction rare event (freezer door doesn't work, player needs to fix it somehow)
 Minecart malfunction rare event (same thing)
-Tutorial in game? dont want to be too intrusive though, as there's no way to detect if the player's already played before
 Per-day quota?
 
 Need to figure out a list of upgrades and debuffs
@@ -23,20 +21,3 @@ Tidier Freezer
 Increases the amount of snowballs that can be stored to exactly 10 (single use)
 
 Debuff Ideas:
-
-
-Tutorial:
-    Order Tutorial
-        Camera shows customer walking into the store
-        Explains how to interact with customers
-        - player takes the order
-        Camera shows the order on top
-        Explains why you need to take orders
-        Explains how you get more money depending on how fast you complete orders
-    Crafter (& farming) Tutorial
-        Camera shows customer walking into the store
-        - player takes the order
-        - bread is guaranteed to be the order
-        Camera shows the order on top
-        text says how you need to farm for wheat
-        Camera goes to minecart entrance

@@ -1,6 +1,5 @@
 package me.ellieis.cooking_frenzy.phases;
 
-import com.mojang.authlib.GameProfile;
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.behaviours.*;
 import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
@@ -106,7 +105,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
         activity.listen(GamePlayerEvents.OFFER, JoinOffer::acceptSpectators);
         // game state setup
         this.gameState = state;
-        this.behaviours.add(new FreezerBehaviour(gameSpace, activity, level, map, scheduler, this.gameState.currentModifiers().getModifier(GameModifiers.snowballTimerMultiplier), debugMode));
+        this.behaviours.add(new FreezerBehaviour(gameSpace, activity, level, map, scheduler, this.gameState.currentModifiers(), debugMode));
         this.customerBehaviour = new CustomerBehaviour<>(gameSpace, activity, this, !isTutorial);
         this.behaviours.add(this.customerBehaviour);
         this.farmingBehaviour = new FarmingBehaviour(gameSpace, activity, this);
@@ -140,9 +139,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             songBehaviour.stopSongs();
             this.gameSpace.getPlayers().playSound(SoundEvent.createFixedRangeEvent(CustomSounds.DRUMROLL, 1000), SoundSource.UI, 1, 1);
         }));
-        this.scheduler.addTask(new Task(this.finishTime, () -> {
-            endGame(false);
-        }));
+        this.scheduler.addTask(new Task(this.finishTime, () -> endGame(false)));
         map.unlockMainRecipeMakers(level);
         for (int i = 0; i < this.gameState.crafterCount() - 1; i++) {
             map.unlockRecipeMaker(level, RecipeMaker.RecipeMakerType.CRAFTER);
@@ -214,19 +211,11 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             }
         }
         if (this.gameSpace.getPlayers().participants().size() - (playerLeaving ? 1 : 0) == 1) {
-            singlePlayerStates.forEach((pos, state) -> {
-                level.setBlock(pos, state, 2);
-            });
-            multiPlayerStates.forEach((pos, state) -> {
-                level.setBlock(pos, Blocks.QUARTZ_BLOCK.defaultBlockState(), 2);
-            });
+            singlePlayerStates.forEach((pos, state) -> level.setBlock(pos, state, 2));
+            multiPlayerStates.forEach((pos, _state) -> level.setBlock(pos, Blocks.QUARTZ_BLOCK.defaultBlockState(), 2));
         } else {
-            singlePlayerStates.forEach((pos, state) -> {
-                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
-            });
-            multiPlayerStates.forEach((pos, state) -> {
-                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
-            });
+            singlePlayerStates.forEach((pos, _state) -> level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2));
+            multiPlayerStates.forEach((pos, _state) -> level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2));
         }
     }
     public void endGame(boolean failed) {
@@ -236,9 +225,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             this.scheduler.clearTasks();
             this.songBehaviour.stopSongs();
             this.gameSpace.getPlayers().playSound(SoundEvent.createFixedRangeEvent(CustomSounds.GAME_OVER, 1000), SoundSource.UI, 1, 1);
-            this.scheduler.addTask(new Task(time + 5 * SharedConstants.TICKS_PER_SECOND, () -> {
-                this.gameSpace.close(GameCloseReason.FINISHED);
-            }));
+            this.scheduler.addTask(new Task(time + 5 * SharedConstants.TICKS_PER_SECOND, () -> this.gameSpace.close(GameCloseReason.FINISHED)));
         } else {
             this.gameSpace.getPlayers().sendPacket(new ClientboundStopSoundPacket(CustomSounds.DRUMROLL, SoundSource.UI));
             this.gameSpace.getPlayers().showTitle(Component.translatable("cooking_frenzy.active.day_end"), 5 * SharedConstants.TICKS_PER_SECOND);
@@ -385,7 +372,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
 
     public void phaseRules(GameActivity activity) {
         activity.allow(GameRuleType.HUNGER);
-        activity.listen(BlockBreakEvent.EVENT, (ServerPlayer player, ServerLevel level, BlockPos pos) -> {
+        activity.listen(BlockBreakEvent.EVENT, (ServerPlayer _player, ServerLevel level, BlockPos pos) -> {
             Block block = level.getBlockState(pos).getBlock();
             if (FarmingBehaviour.isPlant(block) || block.equals(Blocks.MELON) || block.equals(Blocks.PUMPKIN)) {
                 return EventResult.PASS;

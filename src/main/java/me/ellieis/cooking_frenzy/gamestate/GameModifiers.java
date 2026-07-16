@@ -17,7 +17,9 @@ public class GameModifiers {
     public static ModifierType<Float> upgradePriceMultiplier = new ModifierType<>("upgrade_price_multiplier", Float.class);
     public static ModifierType<Float> shopDeliverySpeedMultiplier = new ModifierType<>("shop_delivery_speed_multiplier", Float.class);
     public static ModifierType<Integer> shopDeliveryQueue = new ModifierType<>("shop_delivery_queue", Integer.class);
-    public GameModifiers(int hotbarSlotsAllowed, float crafterSpeedMultiplier, float furnaceSpeedMultiplier, float cropGrowthSpeedMultiplier, float snowballTimeMultiplier, float customerSpawnRateMultiplier, float customerWaitingAngerRateMultiplier, float customerOrderAngerRateMultiplier, float itemDespawnSpeedMultiplier, float upgradePriceMultiplier, float shopDeliverySpeedMultiplier, int shopDeliveryQueue) {
+    public static ModifierType<Integer> targetHitPrecision = new ModifierType<>("target_hit_precision", Integer.class);
+    public static ModifierType<Integer> freezerDamage = new ModifierType<>("freezer_damage", Integer.class);
+    public GameModifiers(int hotbarSlotsAllowed, float crafterSpeedMultiplier, float furnaceSpeedMultiplier, float cropGrowthSpeedMultiplier, float snowballTimeMultiplier, float customerSpawnRateMultiplier, float customerWaitingAngerRateMultiplier, float customerOrderAngerRateMultiplier, float itemDespawnSpeedMultiplier, float upgradePriceMultiplier, float shopDeliverySpeedMultiplier, int shopDeliveryQueue, int targetHitPrecision, int freezerDamage) {
         this.modifiers.put(GameModifiers.hotbarSlotsAllowed, new TypedModifier<>(hotbarSlotsAllowed));
         this.modifiers.put(GameModifiers.crafterSpeedMultiplier, new TypedModifier<>(crafterSpeedMultiplier));
         this.modifiers.put(GameModifiers.furnaceSpeedMultiplier, new TypedModifier<>(furnaceSpeedMultiplier));
@@ -30,6 +32,8 @@ public class GameModifiers {
         this.modifiers.put(GameModifiers.upgradePriceMultiplier, new TypedModifier<>(upgradePriceMultiplier));
         this.modifiers.put(GameModifiers.shopDeliverySpeedMultiplier, new TypedModifier<>(shopDeliverySpeedMultiplier));
         this.modifiers.put(GameModifiers.shopDeliveryQueue, new TypedModifier<>(shopDeliveryQueue));
+        this.modifiers.put(GameModifiers.targetHitPrecision, new TypedModifier<>(targetHitPrecision));
+        this.modifiers.put(GameModifiers.freezerDamage, new TypedModifier<>(freezerDamage));
     }
 
     public <T> void setModifier(ModifierType<T> type, T value) {
@@ -51,6 +55,6 @@ public class GameModifiers {
     }
 
     public GameModifiers() {
-        this(3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        this(3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 0);
     }
 }

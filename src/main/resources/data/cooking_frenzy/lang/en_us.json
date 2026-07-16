@@ -89,6 +89,12 @@
   "cooking_frenzy.debuffs.pricier_upgrades.desc": "Increases the price of all future upgrades by 10%%",
   "cooking_frenzy.debuffs.random_shop_item_expensive": "Import fees",
   "cooking_frenzy.debuffs.random_shop_item_expensive.desc": "A random shop item becomes 25%% more expensive",
+  "cooking_frenzy.debuffs.target_hit_precision": "More Precise Targets",
+  "cooking_frenzy.debuffs.target_hit_precision.desc": "Increases how precise you have to be to hit the targets in the Freezer",
+  "cooking_frenzy.debuffs.freezer_damage": "Freezer burn",
+  "cooking_frenzy.debuffs.freezer_damage.desc": "Take half a heart more damage in the freezer",
+  "cooking_frenzy.debuffs.shop_delivery_speed_increase": "Wrong Shipping Labels",
+  "cooking_frenzy.debuffs.shop_delivery_speed_increase.desc": "Increases the Shop Delivery Time by 20%%",
 
   "cooking_frenzy.setup.day_starting": "Starting a new day in %s",
   "cooking_frenzy.setup.exit": "Stop Playing",

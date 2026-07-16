@@ -71,7 +71,18 @@ public class Upgrades {
                     Component.translatable("cooking_frenzy.debuffs.pricier_upgrades.desc"),
                     GameModifiers.upgradePriceMultiplier,
                     0.1f, 0),
-            new ShopIncreaseDebuff()
+            new ShopIncreaseDebuff(),
+            new IncrementModifierUpgrade<>(Component.translatable("cooking_frenzy.debuffs.target_hit_precision"),
+                    Component.translatable("cooking_frenzy.debuffs.target_hit_precision.desc"),
+                    GameModifiers.targetHitPrecision,
+                    1, 0),
+            new IncrementModifierUpgrade<>(Component.translatable("cooking_frenzy.debuffs.freezer_damage"),
+                    Component.translatable("cooking_frenzy.debuffs.freezer_damage.desc"),
+                    GameModifiers.freezerDamage,
+                    1, 0),
+            new IncrementModifierUpgrade<>(Component.translatable("cooking_frenzy.debuffs.shop_delivery_speed_increase"),
+                    Component.translatable("cooking_frenzy.debuffs.shop_delivery_speed_increase.desc"),
+                    GameModifiers.shopDeliverySpeedMultiplier, 0.2f, 0)
     ));
     public static BaseUpgrade getRandomUpgrade(GameState state) {
         ArrayList<BaseUpgrade> upgrades = new ArrayList<>(Upgrades.upgrades);

@@ -6,6 +6,7 @@ import eu.pb4.polymer.virtualentity.api.elements.TextDisplayElement;
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.events.MeatDispensedEvent;
 import me.ellieis.cooking_frenzy.events.TargetBlockHit;
+import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.map.MapWithFreezer;
 import me.ellieis.cooking_frenzy.scheduler.Scheduler;
 import me.ellieis.cooking_frenzy.ui.ProgressBarComponent;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
@@ -47,6 +49,7 @@ import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
 import xyz.nucleoid.stimuli.Stimuli;
 import xyz.nucleoid.stimuli.event.EventResult;
+import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
 
 import java.util.List;
 
@@ -64,12 +67,16 @@ public class FreezerBehaviour extends BaseBehaviour {
     BlockPos freezerDoorPos;
     int snowballTimer = 0;
     int timeForSnowball;
-    public FreezerBehaviour(GameSpace gameSpace, GameActivity activity, ServerLevel level, MapWithFreezer map, Scheduler scheduler, float snowballMultiplier, boolean debugMode) {
+    final int targetPrecision;
+    final int freezerDamage;
+    public FreezerBehaviour(GameSpace gameSpace, GameActivity activity, ServerLevel level, MapWithFreezer map, Scheduler scheduler, GameModifiers currentModifiers, boolean debugMode) {
         super(gameSpace, activity, debugMode);
         this.level = level;
         this.map = map;
         this.scheduler = scheduler;
-        this.timeForSnowball = Math.round((45 * SharedConstants.TICKS_PER_SECOND) / snowballMultiplier);
+        this.targetPrecision = currentModifiers.getModifier(GameModifiers.targetHitPrecision);
+        this.freezerDamage = currentModifiers.getModifier(GameModifiers.freezerDamage);
+        this.timeForSnowball = Math.round((45 * SharedConstants.TICKS_PER_SECOND) / currentModifiers.getModifier(GameModifiers.snowballTimerMultiplier));
         if (debugMode) {
             System.out.println("Snowball timer: " + timeForSnowball);
         }
@@ -104,6 +111,7 @@ public class FreezerBehaviour extends BaseBehaviour {
     void setupEvents() {
         this.activity.listen(TargetBlockHit.EVENT, this::onTargetHit);
         this.activity.listen(GameActivityEvents.TICK, this::onTick);
+        this.activity.listen(PlayerDamageEvent.EVENT, this::onDamage);
     }
 
     private void onTick() {
@@ -117,6 +125,12 @@ public class FreezerBehaviour extends BaseBehaviour {
         }
     }
 
+    private EventResult onDamage(ServerPlayer player, DamageSource damageSource, float v) {
+        if (damageSource.equals(player.damageSources().freeze())) {
+            player.setHealth(player.getHealth() - freezerDamage);
+        }
+        return EventResult.PASS;
+    }
     private void checkSnowballs() {
         snowballTimer++;
         if ((snowballTimer % (timeForSnowball)) == 0) {
@@ -205,22 +219,16 @@ public class FreezerBehaviour extends BaseBehaviour {
     }
 
     private EventResult onTargetHit(BlockHitResult hitResult, Entity entity, int powerLevel) {
-        if (powerLevel >= 6) {
+        if (powerLevel >= targetPrecision) {
             spawnHitDisplay(true, entity.position(), hitResult.getDirection());
             for (TemplateRegion region : meatProviders) {
                 if (region.getBounds().contains(hitResult.getBlockPos())) {
                     region.getData().getString("type").ifPresent(meatType -> {
                         Item item = null;
                         switch (meatType) {
-                            case "chicken" -> {
-                                item = Items.CHICKEN;
-                            }
-                            case "pork" -> {
-                                item = Items.PORKCHOP;
-                            }
-                            case "beef" -> {
-                                item = Items.BEEF;
-                            }
+                            case "chicken" -> item = Items.CHICKEN;
+                            case "pork" -> item = Items.PORKCHOP;
+                            case "beef" -> item = Items.BEEF;
                         }
                         if (item != null) {
                             Vec3 pos = map.getFoodDropper().getBounds().center();
