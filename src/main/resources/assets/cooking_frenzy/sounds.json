@@ -14,6 +14,12 @@
   "customer_served": {
     "sounds": ["cooking_frenzy:customer_served"]
   },
+  "power_out": {
+    "sounds": ["cooking_frenzy:power_out"]
+  },
+  "power_on": {
+    "sounds": ["cooking_frenzy:power_on"]
+  },
   "song1": {
     "sounds": ["cooking_frenzy:song1"]
   },

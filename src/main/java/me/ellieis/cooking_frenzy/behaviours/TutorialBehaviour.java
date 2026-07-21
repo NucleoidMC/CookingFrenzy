@@ -62,7 +62,7 @@ public class TutorialBehaviour extends BaseBehaviour {
     }
 
     @Override
-    void setupEvents() {
+    protected void setupEvents() {
         activity.listen(ItemUseEvent.EVENT, this::onItemUse);
         activity.listen(BlockPlaceEvent.BEFORE, this::onBlockPlace);
         activity.listen(GameActivityEvents.TICK, this::onTick);

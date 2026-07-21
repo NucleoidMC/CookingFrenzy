@@ -11,13 +11,31 @@ Would work like the farmer, but instead you can buy temporary upgrades during th
 Freezer malfunction rare event (freezer door doesn't work, player needs to fix it somehow)
 Minecart malfunction rare event (same thing)
 Per-day quota?
-
+bathroom (youd have to unclog the toilet every now and then)
 Need to figure out a list of upgrades and debuffs
-
+Recipe pool:
+Each day only has a certain pool of recipes to pick from, kind of like a menu
+This way players can more accurately prepare for the upcoming recipes rather than guessing the next one
 Bugs:
 
+Malfunctions:
+Lights out malfunction
+you have to go to the breaker with both players and they both have to match the lights panel of eachother (only one of them will be on in a random order)
 Upgrade Ideas:
 Tidier Freezer
 Increases the amount of snowballs that can be stored to exactly 10 (single use)
 
 Debuff Ideas:
+extra hunger
+
+health inspection
+npc spawns to go look at the freezer (u cant get inside it)
+
+silverfish infestation
+you need to kill them with bug spray
+
+cash payment
+you have to give change to the customers
+
+power outages
+darkness effect and all recipe makers stop working

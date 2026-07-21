@@ -140,7 +140,7 @@ public class ShopBehaviour extends BaseBehaviour {
     }
 
     @Override
-    void setupEvents() {
+    protected void setupEvents() {
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
         activity.listen(GameActivityEvents.TICK, this::onTick);
     }

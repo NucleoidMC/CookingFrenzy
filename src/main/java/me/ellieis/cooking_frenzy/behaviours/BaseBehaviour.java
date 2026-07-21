@@ -14,5 +14,5 @@ public abstract class BaseBehaviour {
         this.setupEvents();
     }
 
-    abstract void setupEvents();
+    protected abstract void setupEvents();
 }

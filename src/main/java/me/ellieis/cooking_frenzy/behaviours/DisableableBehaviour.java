@@ -1,23 +1,38 @@
 package me.ellieis.cooking_frenzy.behaviours;
 
+import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionType;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 
-// future behaviour idea where a behaviour could become faulty and get disabled randomly
-// then the player needs to fix it somehow
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class DisableableBehaviour extends BaseBehaviour {
-    private boolean isDisabled;
-    public DisableableBehaviour(GameSpace gameSpace, GameActivity activity, boolean debugMode) {
+    protected boolean isDisabled;
+    protected ArrayList<MalfunctionType> disableTypes;
+    public DisableableBehaviour(GameSpace gameSpace, GameActivity activity, boolean debugMode, List<MalfunctionType> disableTypes) {
         super(gameSpace, activity, debugMode);
+        this.disableTypes = new ArrayList<>(disableTypes);
     }
 
-    public void disableBehaviour() {
-        this.isDisabled = true;
+    public void disableBehaviour(MalfunctionType reason) {
+        if (this.disableTypes.contains(reason)) {
+            this.isDisabled = true;
+            this.onDisable(reason);
+        }
     }
 
-    public void enableBehaviour() {
-        this.isDisabled = false;
+    public void enableBehaviour(MalfunctionType reason) {
+        if (this.disableTypes.contains(reason)) {
+            this.isDisabled = false;
+            this.onEnable(reason);
+        }
     }
 
-    abstract void onDisable();
+    public boolean isDisabledBy(MalfunctionType type) {
+        return disableTypes.contains(type);
+    }
+
+    abstract void onDisable(MalfunctionType reason);
+    abstract void onEnable(MalfunctionType reason);
 }

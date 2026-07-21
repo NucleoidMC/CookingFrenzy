@@ -1,6 +1,8 @@
 package me.ellieis.cooking_frenzy.behaviours;
 
 import me.ellieis.cooking_frenzy.behaviours.extra.Farmer;
+import me.ellieis.cooking_frenzy.behaviours.extra.PressurePlateReader;
+import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionType;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.mixins.StemBlockAccessor;
 import me.ellieis.cooking_frenzy.phases.CookingFrenzyActive;
@@ -62,7 +64,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class FarmingBehaviour extends BaseBehaviour {
+public class FarmingBehaviour extends DisableableBehaviour {
     ServerLevel level;
     Mannequin trader;
     BlockPos farmingPlatePos;
@@ -81,7 +83,7 @@ public class FarmingBehaviour extends BaseBehaviour {
     BlockPos singlePlayerButtonPos;
     ArrayList<Item> seeds = new ArrayList<>(List.of(Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.POTATO, Items.CARROT, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS));
     public FarmingBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyActive game) {
-        super(gameSpace, activity, game.debugMode);
+        super(gameSpace, activity, game.debugMode, List.of(MalfunctionType.LIGHTS));
         this.level = game.level;
         this.farmingPlatePos = BlockPos.containing(game.map.getFarmingPlate().getBounds().center());
         this.exitDetectorPos = BlockPos.containing(game.map.getExitDetector().getBounds().center());
@@ -134,7 +136,7 @@ public class FarmingBehaviour extends BaseBehaviour {
         level.addFreshEntity(minecart);
     }
 
-    void setupEvents() {
+    protected void setupEvents() {
         activity.listen(EntityUseEvent.EVENT, this::onEntityUse);
         activity.listen(BlockPlaceEvent.AFTER, this::onBlockPlace);
         activity.listen(BlockBreakEvent.EVENT, this::onBlockBreak);
@@ -197,31 +199,23 @@ public class FarmingBehaviour extends BaseBehaviour {
         }
         boolean powered = this.level.getBlockState(farmingPlatePos).getValue(PressurePlateBlock.POWERED);
         if (debounce && powered && !this.isEntranceOpen) {
-            for (BlockPos bound : this.farmingBarrier.getBounds()) {
-                this.level.setBlock(bound, Blocks.AIR.defaultBlockState(), 2);
+            if (!this.isDisabled) {
+                for (BlockPos bound : this.farmingBarrier.getBounds()) {
+                    this.level.setBlock(bound, Blocks.AIR.defaultBlockState(), 2);
+                }
+                this.level.setBlockAndUpdate(BlockPos.containing(this.farmingBarrier.getBounds().centerBottom()), Blocks.RAIL.defaultBlockState());
+                this.isEntranceOpen = true;
             }
-            this.level.setBlockAndUpdate(BlockPos.containing(this.farmingBarrier.getBounds().centerBottom()), Blocks.RAIL.defaultBlockState());
-            this.isEntranceOpen = true;
         } else if (debounce && !powered && this.isEntranceOpen) {
             for (BlockPos bound : this.farmingBarrier.getBounds()) {
                 this.level.setBlock(bound, Blocks.BARRIER.defaultBlockState(), 2);
             }
             this.isEntranceOpen = false;
         }
-        if (this.level.getBlockEntity(farmingPlatePos.above()) instanceof SignBlockEntity sign) {
-            Component[] text = {
-                    Component.translatable("cooking_frenzy.farming.sign.top"),
-                    Component.translatable("cooking_frenzy.freezer.sign.bottom", powered, 1),
-                    Component.empty(),
-                    Component.empty()
-            };
-            Component[] filteredText = {
-                    Component.empty(),
-                    Component.empty(),
-                    Component.empty(),
-                    Component.empty()
-            };
-            sign.setText(new SignText(text, filteredText, DyeColor.WHITE, true), true);
+        if (this.isDisabled) {
+            PressurePlateReader.updateSigns(List.of(game.map.getFarmingPlate()), level, "cooking_frenzy.farming.disabled", "cooking_frenzy.farming.disabled.2", true);
+        } else {
+            PressurePlateReader.updateSigns(List.of(game.map.getFarmingPlate()), level, "cooking_frenzy.farming.sign.top", "cooking_frenzy.freezer.sign.bottom", false);
         }
 
         powered = this.level.getBlockState(this.exitDetectorPos).getValue(PressurePlateBlock.POWERED);
@@ -408,5 +402,14 @@ public class FarmingBehaviour extends BaseBehaviour {
 
         return InteractionResult.PASS;
     }
+
+    @Override
+    void onDisable(MalfunctionType reason) {
+    }
+
+    @Override
+    void onEnable(MalfunctionType reason) {
+    }
+
     record PlantInfo(BlockPos pos, long tickPlaced) { }
 }

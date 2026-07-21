@@ -17,7 +17,9 @@ public abstract class RecipeMaker {
     // this is the block above the recipemaker that gives the status
     protected BlockPos indicatorPos;
     protected BlockPos buttonPos;
+    protected BlockPos workingIndicatorPos;
     protected BlockState blockState;
+    protected boolean isWorking = true;
     int timer;
     float timerMultiplier;
     boolean debugMode;
@@ -29,6 +31,7 @@ public abstract class RecipeMaker {
         this.orientation = orientation;
         this.indicatorPos = this.position.above();
         this.buttonPos = this.indicatorPos.relative(this.orientation.front(), 1);
+        this.workingIndicatorPos = this.position.relative(this.orientation().front()).below();
         this.blockState = blockState;
         this.timer = timer;
         this.timerMultiplier = timerMultiplier;
@@ -57,15 +60,21 @@ public abstract class RecipeMaker {
     };
     public float timerMultiplier() { return this.timerMultiplier; }
 
+    public void setIsWorking(ServerLevel level, boolean val) {
+        this.isWorking = val;
+        level.setBlock(this.workingIndicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, this.isWorking), 2);
+    }
+
     public void unlock(ServerLevel level) {
         this.isUnlocked = true;
         level.setBlock(this.position, this.blockState, 2);
         level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState(), 2);
         level.setBlock(this.buttonPos, Blocks.SPRUCE_BUTTON.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, this.orientation.front()), 2);
+        level.setBlock(this.workingIndicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);
     }
 
     public void tickTimer(ServerLevel level) {
-        if (this.isMaking) {
+        if (this.isMaking && this.isWorking) {
             if (this.timer > 0) {
                 this.timer--;
                 level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);

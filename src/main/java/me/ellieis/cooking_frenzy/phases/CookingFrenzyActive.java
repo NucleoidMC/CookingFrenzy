@@ -1,7 +1,11 @@
 package me.ellieis.cooking_frenzy.phases;
 
+import me.ellieis.cooking_frenzy.CookingFrenzy;
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.behaviours.*;
+import me.ellieis.cooking_frenzy.behaviours.malfunctions.LightsOutBehaviour;
+import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionBehaviour;
+import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionType;
 import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.GameState;
@@ -21,6 +25,7 @@ import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.InteractionHand;
@@ -64,6 +69,7 @@ import xyz.nucleoid.stimuli.event.player.PlayerInventoryActionEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements PhaseWithState {
     public GlobalWidgets widgets;
@@ -77,11 +83,13 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
     public HashMap<ServerPlayer, JoinIntent> playerIntents;
     public HashMap<ItemEntity, Long> itemThrownTime = new HashMap<>();
     ArrayList<BaseBehaviour> behaviours = new ArrayList<>();
+    ArrayList<MalfunctionBehaviour> malfunctions = new ArrayList<>();
     public long finishTime;
     public long time = 0;
     public int minMoney;
     public boolean gameOver = false;
     public boolean isTutorial;
+    public boolean isSinglePlayer = false;
     HashMap<BlockPos, BlockState> singlePlayerStates = new HashMap<>();
     HashMap<BlockPos, BlockState> multiPlayerStates = new HashMap<>();
     private CookingFrenzyActive(GameSpace gameSpace, CookingFrenzyConfig config, GameActivity activity, GameState state, HashMap<ServerPlayer, JoinIntent> playerIntents, boolean isTutorial, TutorialBehaviour.TutorialType tutorialType) {
@@ -90,37 +98,19 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
         ServerLevel level = gameSpace.getLevels().add(levelConfig);
         this.playerIntents = playerIntents;
         super(config, activity, level, map, state);
+        CookingFrenzy.games.add(this);
         map.setGame(this);
-        activity.listen(GameActivityEvents.TICK, this::onTick);
-        activity.listen(PlayerInventoryActionEvent.EVENT, this::inventoryChange);
-        activity.listen(EntitySpawnEvent.EVENT, this::onEntitySpawn);
-        activity.listen(EntityUseEvent.EVENT, this::onEntityUse);
-        activity.listen(ItemPickupEvent.EVENT, this::onItemPickup);
-        activity.listen(ItemThrowEvent.EVENT, this::onItemThrow);
-        activity.listen(PlayerDeathEvent.EVENT, this::onDeath);
-        activity.listen(BlockPlaceEvent.BEFORE, this::onBlockPlace);
-        activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
-        activity.listen(GamePlayerEvents.JOIN, this::onJoin);
-        activity.listen(GamePlayerEvents.LEAVE, this::onLeave);
-        activity.listen(GamePlayerEvents.OFFER, JoinOffer::acceptSpectators);
+        setupEvents(activity);
         // game state setup
         this.gameState = state;
-        this.behaviours.add(new FreezerBehaviour(gameSpace, activity, level, map, scheduler, this.gameState.currentModifiers(), debugMode));
-        this.customerBehaviour = new CustomerBehaviour<>(gameSpace, activity, this, !isTutorial);
-        this.behaviours.add(this.customerBehaviour);
-        this.farmingBehaviour = new FarmingBehaviour(gameSpace, activity, this);
-        this.behaviours.add(this.farmingBehaviour);
-        this.shopBehaviour = new ShopBehaviour(gameSpace, activity, this);
-        this.behaviours.add(shopBehaviour);
-        this.songBehaviour = new SongBehaviour(gameSpace, activity, this.debugMode, false);
-        this.behaviours.add(songBehaviour);
-        this.behaviours.add(new RecipeMakerBehaviour(gameSpace, activity, level, map, debugMode));
+        this.isTutorial = isTutorial;
+        setupBehaviours(activity);
+        setupMalfunctions(activity);
         this.widgets = GlobalWidgets.addTo(activity);
         this.sidebar = this.widgets.addSidebar(Component.translatable("gameType.cooking_frenzy.cooking_frenzy"));
         this.timeBar = this.widgets.addBossBar(Component.translatable("cooking_frenzy.time_left"), BossEvent.BossBarColor.GREEN, BossEvent.BossBarOverlay.PROGRESS);
         this.shopBar = this.widgets.addBossBar(Component.translatable("cooking_frenzy.shop_delivery"), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS);
         this.shopBar.setVisible(false);
-        this.isTutorial = isTutorial;
         if (isTutorial) {
             this.finishTime = SharedConstants.TICKS_PER_MINUTE * 999;
             behaviours.add(new TutorialBehaviour(gameSpace, activity, this, customerBehaviour, farmingBehaviour, tutorialType, false));
@@ -148,6 +138,40 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             map.unlockRecipeMaker(level, RecipeMaker.RecipeMakerType.FURNACE);
         }
         checkSingleplayerStatus(false);
+    }
+
+    void setupEvents(GameActivity activity) {
+        activity.listen(GameActivityEvents.TICK, this::onTick);
+        activity.listen(GameActivityEvents.DESTROY, this::onDestroy);
+        activity.listen(PlayerInventoryActionEvent.EVENT, this::inventoryChange);
+        activity.listen(EntitySpawnEvent.EVENT, this::onEntitySpawn);
+        activity.listen(EntityUseEvent.EVENT, this::onEntityUse);
+        activity.listen(ItemPickupEvent.EVENT, this::onItemPickup);
+        activity.listen(ItemThrowEvent.EVENT, this::onItemThrow);
+        activity.listen(PlayerDeathEvent.EVENT, this::onDeath);
+        activity.listen(BlockPlaceEvent.BEFORE, this::onBlockPlace);
+        activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
+        activity.listen(GamePlayerEvents.JOIN, this::onJoin);
+        activity.listen(GamePlayerEvents.LEAVE, this::onLeave);
+        activity.listen(GamePlayerEvents.OFFER, JoinOffer::acceptSpectators);
+    }
+
+    void setupBehaviours(GameActivity activity) {
+        this.behaviours.add(new FreezerBehaviour(gameSpace, activity, level, map, scheduler, this.gameState.currentModifiers(), debugMode));
+        this.customerBehaviour = new CustomerBehaviour<>(gameSpace, activity, this, !isTutorial);
+        this.behaviours.add(this.customerBehaviour);
+        this.farmingBehaviour = new FarmingBehaviour(gameSpace, activity, this);
+        this.behaviours.add(this.farmingBehaviour);
+        this.shopBehaviour = new ShopBehaviour(gameSpace, activity, this);
+        this.behaviours.add(shopBehaviour);
+        this.songBehaviour = new SongBehaviour(gameSpace, activity, this.debugMode, false);
+        this.behaviours.add(songBehaviour);
+        this.behaviours.add(new RecipeMakerBehaviour(gameSpace, activity, level, map, debugMode));
+        this.behaviours.add(new LightsOutBehaviour(gameSpace, activity, this));
+    }
+
+    void setupMalfunctions(GameActivity activity) {
+        this.malfunctions.add(new LightsOutBehaviour(gameSpace, activity, this));
     }
 
     void updateWidgets() {
@@ -211,13 +235,29 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             }
         }
         if (this.gameSpace.getPlayers().participants().size() - (playerLeaving ? 1 : 0) == 1) {
+            this.isSinglePlayer = true;
             singlePlayerStates.forEach((pos, state) -> level.setBlock(pos, state, 2));
             multiPlayerStates.forEach((pos, _state) -> level.setBlock(pos, Blocks.QUARTZ_BLOCK.defaultBlockState(), 2));
         } else {
+            this.isSinglePlayer = false;
             singlePlayerStates.forEach((pos, _state) -> level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2));
             multiPlayerStates.forEach((pos, _state) -> level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2));
         }
     }
+
+    public void startMalfunction() {
+        if (this.malfunctions.isEmpty()) return;
+        MalfunctionBehaviour malfunction = this.malfunctions.get(ThreadLocalRandom.current().nextInt(0, this.malfunctions.size()));
+        // only one malfunction of this type per day
+        this.malfunctions.remove(malfunction);
+        this.gameSpace.getPlayers().showTitle(malfunction.getTitle(), 5 * SharedConstants.TICKS_PER_SECOND);
+        this.scheduler.addTask(new Task(this.time + 5 * SharedConstants.TICKS_PER_SECOND, () -> {
+            this.gameSpace.getPlayers().sendMessage(malfunction.getDesc());
+            this.gameSpace.getPlayers().playSound(SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
+        }));
+        malfunction.toggleMalfunction(false);
+    }
+
     public void endGame(boolean failed) {
         if (failed) {
             gameOver = true;
@@ -242,10 +282,15 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
     }
     private void cleanUp() {
         this.gameSpace.getLevels().remove(this.level);
+        CookingFrenzy.games.remove(this);
         this.widgets.removeWidget(sidebar);
         this.widgets.removeWidget(timeBar);
         this.widgets.removeWidget(shopBar);
         this.widgets.close();
+    }
+
+    private void onDestroy(GameCloseReason gameCloseReason) {
+        cleanUp();
     }
 
     private void onTick() {
@@ -264,6 +309,11 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             for (ItemEntity item : itemsToDelete) {
                 this.itemThrownTime.remove(item);
                 item.remove(Entity.RemovalReason.KILLED);
+            }
+        }
+        if (time % SharedConstants.TICKS_PER_MINUTE == 0 && this.gameState.dayCount() > 1) {
+            if (ThreadLocalRandom.current().nextFloat() >= 0.1) {
+                startMalfunction();
             }
         }
         this.scheduler.onTick(time);
@@ -322,7 +372,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
     }
 
     private EventResult onBlockPlace(ServerPlayer player, ServerLevel level, BlockPos blockPos, BlockState blockState, UseOnContext useOnContext) {
-        if (blockState.getBlock().equals(Blocks.BARRIER) || blockState.getBlock().equals(Blocks.WOOL.green())) {
+        if (blockState.getBlock().equals(Blocks.BARRIER) || blockState.getBlock().equals(Blocks.WOOL.green()) || !FarmingBehaviour.isPlant(blockState.getBlock())) {
             return EventResult.DENY;
         } else {
             return EventResult.PASS;
@@ -380,6 +430,28 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
                 return EventResult.DENY;
             }
         });
+    }
+
+    public ArrayList<DisableableBehaviour> getDisableableBehaviours(MalfunctionType type) {
+        ArrayList<DisableableBehaviour> disableableBehaviours = new ArrayList<>();
+        for (BaseBehaviour behaviour : this.behaviours) {
+            if (behaviour instanceof DisableableBehaviour disableableBehaviour) {
+                if (disableableBehaviour.isDisabledBy(type)) {
+                    disableableBehaviours.add(disableableBehaviour);
+                }
+            }
+        }
+        return disableableBehaviours;
+    }
+
+    public ArrayList<DisableableBehaviour> getDisableableBehaviours() {
+        ArrayList<DisableableBehaviour> disableableBehaviours = new ArrayList<>();
+        for (BaseBehaviour behaviour : this.behaviours) {
+            if (behaviour instanceof DisableableBehaviour disableableBehaviour) {
+                disableableBehaviours.add(disableableBehaviour);
+            }
+        }
+        return disableableBehaviours;
     }
 
     public static void Open(GameSpace gameSpace, CookingFrenzyConfig config, GameState state, HashMap<ServerPlayer, JoinIntent> playerIntents) {

@@ -52,9 +52,15 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     TemplateRegion farmingArea;
     TemplateRegion farmingPlate;
     TemplateRegion farmingBarrier;
+    TemplateRegion farmingMinecartButton;
     TemplateRegion exitDetector;
 
     TemplateRegion shopDrop;
+    List<TemplateRegion> lights;
+    List<TemplateRegion> lightBreakerPlates;
+    List<TemplateRegion> lightsArea;
+    List<TemplateRegion> lightsBreaker;
+    List<TemplateRegion> breakerDoors;
     List<TemplateRegion> singlePlayerRegions;
     List<TemplateRegion> multiPlayerRegions;
     GameModifiers modifiers;
@@ -98,9 +104,15 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
         this.farmingArea = meta.getFirstRegion("farming_area");
         this.farmingPlate = meta.getFirstRegion("farming_plate");
         this.farmingBarrier = meta.getFirstRegion("farming_barrier");
+        this.farmingMinecartButton = meta.getFirstRegion("farming_minecart_button");
         this.exitDetector = meta.getFirstRegion("farming_exit_detector");
 
         this.shopDrop = meta.getFirstRegion("shop_drop");
+        this.lights = meta.getRegions("light").toList();
+        this.lightBreakerPlates = meta.getRegions("light_breaker_plate").toList();
+        this.lightsArea = meta.getRegions("lights_area").toList();
+        this.lightsBreaker = meta.getRegions("lights_breaker").toList();
+        this.breakerDoors = meta.getRegions("breaker_door").toList();
         this.singlePlayerRegions = meta.getRegions("single_player").toList();
         this.multiPlayerRegions = meta.getRegions("multi_player").toList();
         this.tutorialCameraPositions = new TutorialCameraPositions(posFromMarker("customer_camera_angle"),
@@ -189,8 +201,15 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     public TemplateRegion getFarmingPlate() { return this.farmingPlate; }
     public TemplateRegion getFarmingBarrier() { return this.farmingBarrier; }
     public TemplateRegion getExitDetector() { return this.exitDetector; }
+    public TemplateRegion getFarmingMinecartButton() { return this.farmingMinecartButton; }
     public boolean isInFarmingArea(ServerPlayer player) { return this.farmingArea.getBounds().contains(player.blockPosition()); }
+
     public TemplateRegion getShopDrop() { return this.shopDrop; }
+    public List<TemplateRegion> getLights() { return this.lights; }
+    public List<TemplateRegion> getLightBreakerPlates() { return this.lightBreakerPlates; }
+    public List<TemplateRegion> getLightsArea() { return this.lightsArea; }
+    public List<TemplateRegion> getLightsBreaker() { return this.lightsBreaker; }
+    public List<TemplateRegion> getBreakerDoors() { return this.breakerDoors; }
     public List<TemplateRegion> getSinglePlayerRegions() { return this.singlePlayerRegions; }
     public List<TemplateRegion> getMultiPlayerRegions() { return this.multiPlayerRegions; }
 

@@ -101,10 +101,10 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
     private InteractionResult onBlockUse(ServerPlayer player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.getBlockState(hitResult.getBlockPos()).getBlock() instanceof LecternBlock) {
             if (map.getTutorialLectern().getBounds().contains(hitResult.getBlockPos())) {
+                gameSpace.getPlayers().kick(player);
                 GameSpaceManagerImpl.get().open(level.registryAccess().lookupOrThrow(PlasmidRegistryKeys.GAME_CONFIG).get(CookingFrenzy.identifier("tutorial")).orElseThrow()).handleAsync((tutorial, throwable) -> {
                     tutorial.addPlayerFilter(playerRef -> playerRef.id().equals(player.getUUID()));
                     if (throwable == null) {
-                        gameSpace.getPlayers().kick(player);
                         GamePlayerJoiner.tryJoin(player, tutorial, JoinIntent.PLAY);
                     } else {
                         player.sendSystemMessage(Component.translatable("cooking_frenzy.tutorial.open_failed"));

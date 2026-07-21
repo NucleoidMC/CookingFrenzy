@@ -32,7 +32,7 @@ public class SongBehaviour extends BaseBehaviour {
     }
 
     @Override
-    void setupEvents() {
+    protected void setupEvents() {
         activity.listen(GameActivityEvents.TICK, this::onTick);
     }
 

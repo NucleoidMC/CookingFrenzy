@@ -8,6 +8,8 @@ public class CustomSounds {
     public static final Identifier OVEN_DING = CookingFrenzy.identifier("oven_ding");
     public static final Identifier CUSTOMER_LEAVE = CookingFrenzy.identifier("customer_leave");
     public static final Identifier CUSTOMER_SERVED = CookingFrenzy.identifier("customer_served");
+    public static final Identifier POWER_OUT = CookingFrenzy.identifier("power_out");
+    public static final Identifier POWER_ON = CookingFrenzy.identifier("power_on");
     public static final Identifier DRUMROLL = CookingFrenzy.identifier("drum_roll");
     public static final Identifier TIMER_END = CookingFrenzy.identifier("timer_end");
     public static final Identifier SONG1 = CookingFrenzy.identifier("song1");

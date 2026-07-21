@@ -95,7 +95,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
     public CustomerBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyPhase<T> game, boolean spawnCustomersAutomatically) {
         this(gameSpace, activity, game, SharedConstants.TICKS_PER_MINUTE - ((Math.min(30, 5 * game.gameState.dayCount()) * SharedConstants.TICKS_PER_SECOND)), (90 - (2 * game.gameState.dayCount())) * SharedConstants.TICKS_PER_SECOND, spawnCustomersAutomatically);
     }
-    void setupEvents() {
+    protected void setupEvents() {
         activity.listen(GameActivityEvents.TICK, this::onTick);
         activity.listen(EntityUseEvent.EVENT, this::onUse);
     }

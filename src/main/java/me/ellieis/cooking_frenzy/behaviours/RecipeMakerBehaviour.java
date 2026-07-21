@@ -1,5 +1,6 @@
 package me.ellieis.cooking_frenzy.behaviours;
 
+import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionType;
 import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
 import me.ellieis.cooking_frenzy.map.Active;
 import me.ellieis.cooking_frenzy.map.MapWithRecipeMaker;
@@ -18,21 +19,23 @@ import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
 import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class RecipeMakerBehaviour extends BaseBehaviour{
+public class RecipeMakerBehaviour extends DisableableBehaviour {
     MapWithRecipeMaker map;
     ServerLevel level;
     public RecipeMakerBehaviour(GameSpace gameSpace, GameActivity activity, ServerLevel level, MapWithRecipeMaker map, boolean debugMode) {
-        super(gameSpace, activity, debugMode);
+        super(gameSpace, activity, debugMode, List.of(MalfunctionType.LIGHTS));
         this.map = map;
         this.level = level;
     }
-    void setupEvents() {
+    protected void setupEvents() {
         activity.listen(GameActivityEvents.TICK, this::onTick);
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
     }
 
     private InteractionResult onBlockUse(ServerPlayer player, InteractionHand hand, BlockHitResult blockHitResult) {
+        if (this.isDisabled) return InteractionResult.PASS;
         Block block = this.level.getBlockState(blockHitResult.getBlockPos()).getBlock();
         if (block instanceof ButtonBlock) {
             ArrayList<RecipeMaker> crafters = map.getRecipeMakers(RecipeMaker.RecipeMakerType.CRAFTER);
@@ -76,5 +79,24 @@ public class RecipeMakerBehaviour extends BaseBehaviour{
         for (RecipeMaker recipeMaker : furnaces) {
             recipeMaker.tickTimer(this.level);
         }
+    }
+    void setEnabled(boolean val) {
+        ArrayList<RecipeMaker> crafters = this.map.getRecipeMakers(RecipeMaker.RecipeMakerType.CRAFTER);
+        ArrayList<RecipeMaker> furnaces = this.map.getRecipeMakers(RecipeMaker.RecipeMakerType.FURNACE);
+        for (RecipeMaker recipeMaker : crafters) {
+            recipeMaker.setIsWorking(level, val);
+        }
+        for (RecipeMaker recipeMaker : furnaces) {
+            recipeMaker.setIsWorking(level, val);
+        }
+    }
+    @Override
+    void onDisable(MalfunctionType reason) {
+        setEnabled(false);
+    }
+
+    @Override
+    void onEnable(MalfunctionType reason) {
+        setEnabled(true);
     }
 }
