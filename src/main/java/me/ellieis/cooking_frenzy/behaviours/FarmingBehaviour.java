@@ -81,6 +81,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
     public int cropGrowTime;
     CookingFrenzyActive game;
     BlockPos singlePlayerButtonPos;
+    BlockPos farmingButtonRedstoneBlock;
     ArrayList<Item> seeds = new ArrayList<>(List.of(Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.POTATO, Items.CARROT, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS));
     public FarmingBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyActive game) {
         super(gameSpace, activity, game.debugMode, List.of(MalfunctionType.LIGHTS));
@@ -91,6 +92,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
         this.scheduler = game.scheduler;
         this.farmer = new Farmer(game);
         this.game = game;
+        this.farmingButtonRedstoneBlock = BlockPos.containing(game.map.getFarmingButtonRedstoneBlock().getBounds().center());
         this.cropGrowTime = Math.round(SharedConstants.TICKS_PER_MINUTE / game.gameState.currentModifiers().getModifier(GameModifiers.cropGrowthSpeedMultiplier));
         for (TemplateRegion region : this.game.map.getSinglePlayerRegions()) {
             if (region.getData().getBooleanOr("farming", false)) {
@@ -227,6 +229,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
             for (BlockPos bound : this.farmingBarrier.getBounds()) {
                 this.level.setBlock(bound, Blocks.AIR.defaultBlockState(), 2);
             }
+            this.level.setBlockAndUpdate(this.farmingButtonRedstoneBlock, Blocks.REDSTONE_BLOCK.defaultBlockState());
             this.level.setBlockAndUpdate(BlockPos.containing(this.farmingBarrier.getBounds().centerBottom()), Blocks.RAIL.defaultBlockState());
             debounce = false;
             this.scheduler.addTask(new Task(this.game.time + SharedConstants.TICKS_PER_SECOND, (() -> {
@@ -234,6 +237,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
                     for (BlockPos bound : this.farmingBarrier.getBounds()) {
                         this.level.setBlock(bound, Blocks.BARRIER.defaultBlockState(), 2);
                     }
+                    this.level.setBlockAndUpdate(this.farmingButtonRedstoneBlock, Blocks.AIR.defaultBlockState());
                 }
                 debounce = true;
             })));
@@ -329,6 +333,9 @@ public class FarmingBehaviour extends DisableableBehaviour {
     private DroppedItemsResult droppedItemModifier(@Nullable Entity entity, ServerLevel level, BlockPos blockPos, BlockState blockState, List<ItemStack> itemStacks) {
         ArrayList<ItemStack> modifiedItems = new ArrayList<>(itemStacks);
         ArrayList<Item> itemsModified = new ArrayList<>();
+        if (blockState.getBlock() instanceof CropBlock crop && !crop.isMaxAge(blockState)) {
+            return DroppedItemsResult.pass(itemStacks);
+        }
         modifiedItems.forEach(itemStack -> {
             Item item = itemStack.getItem();
             if (itemsModified.contains(item)) {

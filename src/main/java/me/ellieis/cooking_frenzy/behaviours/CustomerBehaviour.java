@@ -56,6 +56,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
     public int timeSinceLastCustomer;
     public int timeForCustomerSpawn;
     public int customerTimeout;
+    public int orderPenalty;
     public boolean firstOrderSet = false;
     public BaseOrder firstOrder = null;
     boolean spawnCustomersAutomatically;
@@ -65,6 +66,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         this.game = game;
         this.customerLights = map.getCustomerLights();
         this.spawnCustomersAutomatically = spawnCustomersAutomatically;
+        this.orderPenalty = Math.clamp(Math.round(game.gameState.money() / 0.25f), 15, 80);
         GameModifiers modifiers = this.game.gameState.currentModifiers();
         this.timeForCustomerSpawn = Math.round(timeForCustomerSpawn / modifiers.getModifier(GameModifiers.customerSpawnRateMultiplier));
         this.customerTimeout = Math.round(customerTimeout / modifiers.getModifier(GameModifiers.customerWaitingAngerRateMultiplier));

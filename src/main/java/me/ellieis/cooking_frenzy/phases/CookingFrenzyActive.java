@@ -312,7 +312,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             }
         }
         if (time % SharedConstants.TICKS_PER_MINUTE == 0 && this.gameState.dayCount() > 1) {
-            if (ThreadLocalRandom.current().nextFloat() >= 0.1) {
+            if (ThreadLocalRandom.current().nextFloat() >= 0.025 * this.gameState.dayCount()) {
                 startMalfunction();
             }
         }

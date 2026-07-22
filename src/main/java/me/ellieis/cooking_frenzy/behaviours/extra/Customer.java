@@ -203,7 +203,7 @@ public class Customer {
         if (this.hasReachedSeat && interactible) {
             if (this.timeout <= 0) {
                 this.entity.setXRot(0);
-                this.setScore(-20);
+                this.setScore(behaviour.orderPenalty);
                 this.sitUp();
                 this.timeoutBar.remove(Entity.RemovalReason.KILLED);
                 this.orderDisplay.remove(Entity.RemovalReason.KILLED);
