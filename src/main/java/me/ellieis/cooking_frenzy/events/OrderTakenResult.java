@@ -5,7 +5,7 @@ import net.minecraft.world.item.Items;
 import xyz.nucleoid.stimuli.event.EventResult;
 
 public final class OrderTakenResult {
-    private static final OrderTakenResult DENY = new OrderTakenResult(EventResult.PASS, new BaseOrder(Items.AIR, 0, 1));
+    private static final OrderTakenResult DENY = new OrderTakenResult(EventResult.PASS, new BaseOrder(Items.AIR, 0, 1, 60));
 
     private final EventResult result;
     private final BaseOrder order;
