@@ -262,7 +262,7 @@ public class Customer {
                     item.shrink(1);
                     int timeLimit = this.currentOrder.timeLimit();
                     this.orderDisplay.remove(Entity.RemovalReason.KILLED);
-                    this.setScore((Math.round((60 * Math.max(0.5f, ((float) this.timeout / timeLimit))))));
+                    this.setScore((Math.round((this.currentOrder.money() * Math.max(0.5f, ((float) this.timeout / timeLimit))))));
                     this.timeoutBar.remove(Entity.RemovalReason.KILLED);
                     sitUp();
                     this.behaviour.onCustomerServed(this);

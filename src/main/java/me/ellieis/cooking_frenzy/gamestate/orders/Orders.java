@@ -14,7 +14,7 @@ public class Orders {
     public static ArrayList<BaseOrder> TIER1 = new ArrayList<>(List.of(
             BaseOrder.inSeconds(Items.COOKED_PORKCHOP, 150, 1),
             BaseOrder.inSeconds(Items.COOKED_CHICKEN, 150, 1),
-            BaseOrder.inSeconds(Items.BREAD, 180, 1),
+            BaseOrder.inSeconds(Items.BREAD, 180, 1, 90),
             BaseOrder.inSeconds(Items.BAKED_POTATO, 150, 1),
             BaseOrder.inSeconds(Items.CARROT, 120, 1),
             BaseOrder.inSeconds(Items.BEETROOT, 120, 1),
@@ -31,8 +31,8 @@ public class Orders {
             BaseOrder.inSeconds(Items.COOKED_BEEF, 150, 2)
             ));
     public static ArrayList<BaseOrder> TIER3 = new ArrayList<>(List.of(
-            BaseOrder.inSeconds(Items.CAKE, 240, 3),
-            BaseOrder.inSeconds(Items.BEETROOT_SOUP, 180, 3)
+            BaseOrder.inSeconds(Items.CAKE, 270, 3, 200),
+            BaseOrder.inSeconds(Items.BEETROOT_SOUP, 180, 3, 90)
             ));
     public static BaseOrder random(int tier, RandomSource random) {
         int tier1Chance = 0;
