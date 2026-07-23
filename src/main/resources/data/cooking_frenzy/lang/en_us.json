@@ -26,7 +26,7 @@
   "cooking_frenzy.tutorial.customer_arrived.take_order": "You should go take their order with Right Click!",
   "cooking_frenzy.tutorial.customer_arrived.order_taken": "Looks like this customer wants %s!",
   "cooking_frenzy.tutorial.customer_arrived.timeout_bar": "Pay attention to the bar above their head, it displays how long you have until an Order expires.",
-  "cooking_frenzy.tutorial.customer_arrived.timeout_bar.extended": "The faster you clear an order, the more money you can get (up to 60)",
+  "cooking_frenzy.tutorial.customer_arrived.timeout_bar.extended": "The faster you clear an order, the more money you can get (usually up to 60)",
   "cooking_frenzy.tutorial.freezer.outside": "This is the freezer, you can get all kinds of meat from here.",
   "cooking_frenzy.tutorial.freezer.target": "Hit the target blocks with snowballs to gain meat",
   "cooking_frenzy.tutorial.cook": "Good job, now head to the stove to cook your food!",

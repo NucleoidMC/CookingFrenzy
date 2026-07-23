@@ -1,12 +1,10 @@
 package me.ellieis.cooking_frenzy.behaviours;
 
-import me.ellieis.cooking_frenzy.behaviours.extra.CookingTutorial;
-import me.ellieis.cooking_frenzy.behaviours.extra.CraftingTutorial;
-import me.ellieis.cooking_frenzy.behaviours.extra.OrderTutorial;
-import me.ellieis.cooking_frenzy.gamestate.GameState;
+import me.ellieis.cooking_frenzy.behaviours.tutorials.CookingTutorial;
+import me.ellieis.cooking_frenzy.behaviours.tutorials.CraftingTutorial;
+import me.ellieis.cooking_frenzy.behaviours.tutorials.OrderTutorial;
 import me.ellieis.cooking_frenzy.map.Active;
 import me.ellieis.cooking_frenzy.phases.CookingFrenzyActive;
-import me.ellieis.cooking_frenzy.phases.CookingFrenzyTutorial;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -25,7 +23,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
-import xyz.nucleoid.plasmid.api.game.GameCloseReason;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
 import xyz.nucleoid.plasmid.api.util.PlayerUtil;
@@ -33,7 +30,6 @@ import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.block.BlockPlaceEvent;
 import xyz.nucleoid.stimuli.event.item.ItemUseEvent;
 
-import java.awt.*;
 import java.util.Set;
 
 public class TutorialBehaviour extends BaseBehaviour {

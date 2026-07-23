@@ -66,6 +66,7 @@ public class Furnace extends RecipeMaker {
                     Item item = furnaceBe.getItem(0).getItem();
                     boolean isOre = item.equals(Items.RAW_IRON) || item.equals(Items.RAW_GOLD);
                     this.timer = Math.round(((isOre) ? 15 * SharedConstants.TICKS_PER_SECOND : 30 * SharedConstants.TICKS_PER_SECOND) * this.timerMultiplier);
+                    this.maxTimer = timer;
                     if (this.debugMode) {
                         System.out.println("Furnace Timer: " + timer);
                     }

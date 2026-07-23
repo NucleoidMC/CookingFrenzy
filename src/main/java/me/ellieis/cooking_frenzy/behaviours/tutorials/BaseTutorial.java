@@ -1,4 +1,4 @@
-package me.ellieis.cooking_frenzy.behaviours.extra;
+package me.ellieis.cooking_frenzy.behaviours.tutorials;
 
 import me.ellieis.cooking_frenzy.behaviours.TutorialBehaviour;
 import me.ellieis.cooking_frenzy.map.Active;

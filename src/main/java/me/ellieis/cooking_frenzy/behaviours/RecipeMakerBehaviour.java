@@ -35,19 +35,20 @@ public class RecipeMakerBehaviour extends DisableableBehaviour {
     }
 
     private InteractionResult onBlockUse(ServerPlayer player, InteractionHand hand, BlockHitResult blockHitResult) {
-        if (this.isDisabled) return InteractionResult.PASS;
         Block block = this.level.getBlockState(blockHitResult.getBlockPos()).getBlock();
         if (block instanceof ButtonBlock) {
             ArrayList<RecipeMaker> crafters = map.getRecipeMakers(RecipeMaker.RecipeMakerType.CRAFTER);
             ArrayList<RecipeMaker> furnaces = map.getRecipeMakers(RecipeMaker.RecipeMakerType.FURNACE);
             for (RecipeMaker recipeMaker : crafters) {
                 if (recipeMaker.isUnlocked() && !recipeMaker.isMaking() && recipeMaker.buttonPos().equals(blockHitResult.getBlockPos())) {
+                    if (this.isDisabled) return InteractionResult.FAIL;
                     recipeMaker.interact(this.level);
                     return InteractionResult.FAIL;
                 }
             }
             for (RecipeMaker recipeMaker : furnaces) {
                 if (recipeMaker.isUnlocked() && !recipeMaker.isMaking() && recipeMaker.buttonPos().equals(blockHitResult.getBlockPos())) {
+                    if (this.isDisabled) return InteractionResult.FAIL;
                     recipeMaker.interact(this.level);
                     return InteractionResult.FAIL;
                 }
@@ -57,12 +58,12 @@ public class RecipeMakerBehaviour extends DisableableBehaviour {
             ArrayList<RecipeMaker> furnaces = map.getRecipeMakers(RecipeMaker.RecipeMakerType.FURNACE);
 
             for (RecipeMaker recipeMaker : crafters) {
-                if (recipeMaker.isMaking() && recipeMaker.position().equals(blockHitResult.getBlockPos())) {
+                if ((recipeMaker.isMaking() || this.isDisabled) && recipeMaker.position().equals(blockHitResult.getBlockPos())) {
                     return InteractionResult.FAIL;
                 }
             }
             for (RecipeMaker recipeMaker : furnaces) {
-                if (recipeMaker.isMaking() && recipeMaker.position().equals(blockHitResult.getBlockPos())) {
+                if ((recipeMaker.isMaking() || this.isDisabled) && recipeMaker.position().equals(blockHitResult.getBlockPos())) {
                     return InteractionResult.FAIL;
                 }
             }
@@ -84,10 +85,14 @@ public class RecipeMakerBehaviour extends DisableableBehaviour {
         ArrayList<RecipeMaker> crafters = this.map.getRecipeMakers(RecipeMaker.RecipeMakerType.CRAFTER);
         ArrayList<RecipeMaker> furnaces = this.map.getRecipeMakers(RecipeMaker.RecipeMakerType.FURNACE);
         for (RecipeMaker recipeMaker : crafters) {
-            recipeMaker.setIsWorking(level, val);
+            if (recipeMaker.isUnlocked()) {
+                recipeMaker.setIsWorking(level, val);
+            }
         }
         for (RecipeMaker recipeMaker : furnaces) {
-            recipeMaker.setIsWorking(level, val);
+            if (recipeMaker.isUnlocked()) {
+                recipeMaker.setIsWorking(level, val);
+            }
         }
     }
     @Override
@@ -97,6 +102,8 @@ public class RecipeMakerBehaviour extends DisableableBehaviour {
 
     @Override
     void onEnable(MalfunctionType reason) {
-        setEnabled(true);
+        if (this.malfunctionsAffectingBehaviour.isEmpty()) {
+            setEnabled(true);
+        }
     }
 }

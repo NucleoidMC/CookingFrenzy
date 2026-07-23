@@ -436,7 +436,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
         ArrayList<DisableableBehaviour> disableableBehaviours = new ArrayList<>();
         for (BaseBehaviour behaviour : this.behaviours) {
             if (behaviour instanceof DisableableBehaviour disableableBehaviour) {
-                if (disableableBehaviour.isDisabledBy(type)) {
+                if (disableableBehaviour.canBeAffectedBy(type)) {
                     disableableBehaviours.add(disableableBehaviour);
                 }
             }

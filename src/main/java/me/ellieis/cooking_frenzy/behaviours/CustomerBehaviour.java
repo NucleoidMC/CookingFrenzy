@@ -2,6 +2,7 @@ package me.ellieis.cooking_frenzy.behaviours;
 
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.behaviours.extra.Customer;
+import me.ellieis.cooking_frenzy.behaviours.extra.PathfinderNPC;
 import me.ellieis.cooking_frenzy.events.CustomerOrderTakenEvent;
 import me.ellieis.cooking_frenzy.events.CustomerServedEvent;
 import me.ellieis.cooking_frenzy.events.CustomerSpawnEvent;
@@ -49,7 +50,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
     final MapWithCustomer map;
     final CookingFrenzyPhase<T> game;
     TemplateRegion customerLights;
-    ArrayList<Node> nodes = new ArrayList<>();
+    ArrayList<PathfinderNPC.Node> nodes = new ArrayList<>();
     ArrayList<Seat> seats = new ArrayList<>();
     ArrayList<Customer> customers = new ArrayList<>();
     ArrayList<Customer> customersToDespawn = new ArrayList<>();
@@ -66,7 +67,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         this.game = game;
         this.customerLights = map.getCustomerLights();
         this.spawnCustomersAutomatically = spawnCustomersAutomatically;
-        this.orderPenalty = Math.clamp(Math.round(game.gameState.money() / 0.25f), 15, 80);
+        this.orderPenalty = -Math.clamp(Math.round(game.gameState.money() * 0.25f), 15, 80);
         GameModifiers modifiers = this.game.gameState.currentModifiers();
         this.timeForCustomerSpawn = Math.round(timeForCustomerSpawn / modifiers.getModifier(GameModifiers.customerSpawnRateMultiplier));
         this.customerTimeout = Math.round(customerTimeout / modifiers.getModifier(GameModifiers.customerWaitingAngerRateMultiplier));
@@ -88,7 +89,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
                 seatIds.add(seats.asInt().orElseThrow());
             }
 
-            this.nodes.add(new Node(nodeRegion.getData().getInt("step").orElseThrow(), seatIds, nodeRegion.getBounds().centerBottom()));
+            this.nodes.add(new PathfinderNPC.Node(nodeRegion.getData().getInt("step").orElseThrow(), seatIds, nodeRegion.getBounds().centerBottom()));
         }
         if (this.spawnCustomersAutomatically) {
             this.spawnCustomer(true);
@@ -254,10 +255,10 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         }
 
         Vec3 spawn = customerSpawns.get(ThreadLocalRandom.current().nextInt(customerSpawns.size())).getBounds().centerBottom();
-        ArrayList<Node> path = calculatePathForSeat(seat);
+        ArrayList<PathfinderNPC.Node> path = calculatePathForSeat(seat);
         // there are two node 0s, because there's two spawn positions. need to remove the other spawn pos
-        Node nodeToDelete = null;
-        for (Node node : path) {
+        PathfinderNPC.Node nodeToDelete = null;
+        for (PathfinderNPC.Node node : path) {
             if (node.step() == 0) {
                 if (node.position().distanceTo(spawn) >= 2) {
                     nodeToDelete = node;
@@ -305,10 +306,10 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         return orders;
     }
 
-    private ArrayList<Node> calculatePathForSeat(Seat seat) {
-        ArrayList<Node> steps = new ArrayList<>();
-        for (Node node : this.nodes) {
-            if (node.seats.contains(seat.id())) {
+    private ArrayList<PathfinderNPC.Node> calculatePathForSeat(Seat seat) {
+        ArrayList<PathfinderNPC.Node> steps = new ArrayList<>();
+        for (PathfinderNPC.Node node : this.nodes) {
+            if (node.options().contains(seat.id())) {
                 steps.add(node);
             }
         }
@@ -327,8 +328,6 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
             player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 1, 1, player.level().getSeed()));
         }
     }
-
-    public record Node(int step, ArrayList<Integer> seats, Vec3 position) { }
 
     public record Seat(int id, ArmorStand entity, Vec3 position, int yaw, boolean hasCustomer) {
         public Seat setHasCustomer(boolean val) {

@@ -1,6 +1,5 @@
-package me.ellieis.cooking_frenzy.behaviours.extra;
+package me.ellieis.cooking_frenzy.behaviours.tutorials;
 
-import eu.pb4.polymer.resourcepack.extras.api.format.atlas.AtlasAsset;
 import me.ellieis.cooking_frenzy.behaviours.CustomerBehaviour;
 import me.ellieis.cooking_frenzy.behaviours.FarmingBehaviour;
 import me.ellieis.cooking_frenzy.behaviours.TutorialBehaviour;
@@ -12,12 +11,8 @@ import me.ellieis.cooking_frenzy.scheduler.Scheduler;
 import me.ellieis.cooking_frenzy.scheduler.Task;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.data.AtlasIds;
-import net.minecraft.gizmos.TextGizmo;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FontDescription;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;

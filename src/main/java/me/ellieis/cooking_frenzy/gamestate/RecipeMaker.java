@@ -1,12 +1,24 @@
 package me.ellieis.cooking_frenzy.gamestate;
 
+import com.mojang.math.Transformation;
+import me.ellieis.cooking_frenzy.ui.ProgressBarComponent;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+import java.util.Set;
 
 public abstract class RecipeMaker {
     protected boolean isUnlocked;
@@ -19,7 +31,10 @@ public abstract class RecipeMaker {
     protected BlockPos buttonPos;
     protected BlockPos workingIndicatorPos;
     protected BlockState blockState;
+    protected Display.TextDisplay timerDisplay;
     protected boolean isWorking = true;
+    boolean blinking = false;
+    int maxTimer;
     int timer;
     float timerMultiplier;
     boolean debugMode;
@@ -60,6 +75,39 @@ public abstract class RecipeMaker {
     };
     public float timerMultiplier() { return this.timerMultiplier; }
 
+    public void spawnTimer(ServerLevel level) {
+        this.timerDisplay = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, level);
+        timerDisplay.setBackgroundColor(0);
+        Vec3 pos = Vec3.atCenterOf(this.position().relative(this.orientation.front())).relative(orientation.front(), -0.48);
+        timerDisplay.teleportTo(level, pos.x(), pos.y(), pos.z(), Set.of(), this.orientation().front().toYRot(), 0, false);
+        timerDisplay.setTransformation(new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.4f, 0.4f, 0.1f), new Quaternionf()));
+        level.addFreshEntity(timerDisplay);
+    }
+
+    public void updateTimer(ServerLevel level, boolean isWorking) {
+        if (this.timerDisplay != null) {
+            if (this.timer == 0) {
+                timerDisplay.setText(Component.empty());
+            } else {
+                if (!isWorking) {
+                    if (this.timer % 20 == 0) {
+                        blinking = !blinking;
+                        if (blinking) {
+                            timerDisplay.setText(ProgressBarComponent.create(8, maxTimer - timer, 0, maxTimer, true, ChatFormatting.RED, ChatFormatting.WHITE));
+                        } else {
+                            timerDisplay.setText(Component.empty());
+                        }
+                    } else {
+                        timerDisplay.setText(Component.empty());
+                    }
+                } else {
+                    timerDisplay.setText(ProgressBarComponent.create(8, maxTimer - timer, 0, maxTimer, true, ChatFormatting.AQUA, ChatFormatting.WHITE));
+                }
+
+            }
+        }
+    }
+
     public void setIsWorking(ServerLevel level, boolean val) {
         this.isWorking = val;
         level.setBlock(this.workingIndicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, this.isWorking), 2);
@@ -74,16 +122,23 @@ public abstract class RecipeMaker {
     }
 
     public void tickTimer(ServerLevel level) {
-        if (this.isMaking && this.isWorking) {
-            if (this.timer > 0) {
-                this.timer--;
-                level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);
-                this.internalLoop(level);
-            } else {
-                this.isMaking = false;
-                level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState(), 2);
-                this.onMake(level);
+        if (this.timerDisplay == null) {
+            this.spawnTimer(level);
+        }
+        if (this.isMaking) {
+            if (this.isWorking) {
+                if (this.timer > 0) {
+                    this.timer--;
+                    level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);
+                    this.internalLoop(level);
+                } else {
+                    this.isMaking = false;
+                    this.maxTimer = 0;
+                    level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState(), 2);
+                    this.onMake(level);
+                }
             }
+            this.updateTimer(level, this.isWorking);
         }
     }
 

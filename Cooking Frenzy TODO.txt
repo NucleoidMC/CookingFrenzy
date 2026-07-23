@@ -28,8 +28,9 @@ Increases the amount of snowballs that can be stored to exactly 10 (single use)
 Debuff Ideas:
 extra hunger
 
-health inspection
+freezer maintenance
 npc spawns to go look at the freezer (u cant get inside it)
+after a bit he asks you for shears to fix the wiring, and then 10s later goes away
 
 silverfish infestation
 you need to kill them with bug spray

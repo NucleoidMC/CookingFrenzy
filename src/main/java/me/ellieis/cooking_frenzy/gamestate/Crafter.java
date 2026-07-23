@@ -56,6 +56,7 @@ public class Crafter extends RecipeMaker {
         if (CrafterBlock.getPotentialResults(level, be.asCraftInput()).isPresent()) {
             // 5 seconds per item
             this.timer = Math.round((be.asCraftInput().items().size() * 100) * this.timerMultiplier);
+            this.maxTimer = timer;
             if (this.debugMode) {
                 System.out.println("Crafter Timer: " + timer);
             }

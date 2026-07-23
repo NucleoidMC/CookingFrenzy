@@ -7,6 +7,7 @@ import me.ellieis.cooking_frenzy.events.CustomerOrderTakenEvent;
 import me.ellieis.cooking_frenzy.events.CustomerSitEvent;
 import me.ellieis.cooking_frenzy.gamestate.orders.BaseOrder;
 import me.ellieis.cooking_frenzy.gamestate.orders.Orders;
+import me.ellieis.cooking_frenzy.map.Active;
 import me.ellieis.cooking_frenzy.mixins.MannequinAccessor;
 import me.ellieis.cooking_frenzy.ui.ProgressBarComponent;
 import me.ellieis.cooking_frenzy.ui.spatial.attachment.PopUpAttachment;
@@ -37,22 +38,10 @@ import java.util.Set;
 
 import static me.ellieis.cooking_frenzy.ui.Common.mapRange;
 
-public class Customer {
-    ArrayList<CustomerBehaviour.Node> nodes;
-    int currentNodeId;
-    Vec3 pointToNavigate;
-    Vec3 oldPos;
+public class Customer extends PathfinderNPC{
     public CustomerBehaviour.Seat seat;
     ArmorStand seatEntity;
-    public Mannequin entity;
-    ServerLevel level;
-    double distanceToPoint;
-    long timeToWalk;
-    long walkCounter;
-    double alpha = 0;
-    float currentYaw;
     boolean hasReachedSeat = false;
-    public boolean despawnFlag = false;
     int recipeTier;
     public BaseOrder currentOrder = null;
     Display.ItemDisplay orderDisplay;
@@ -63,16 +52,10 @@ public class Customer {
     Display.TextDisplay timeoutBar;
     float waitingAngerRateMultiplier;
     float orderAngerRateMultiplier;
-    public Customer(ArrayList<CustomerBehaviour.Node> nodes, ServerLevel level, Vec3 spawnPos, CustomerBehaviour behaviour, float waitingAngerRateMultiplier, float orderAngerRateMultiplier, CustomerBehaviour.Seat seat, int recipeTier, ResolvableProfile skin) {
-        this.nodes = nodes;
-        this.level = level;
-        this.currentNodeId = 0;
+    public Customer(ArrayList<PathfinderNPC.Node> nodes, ServerLevel level, Vec3 spawnPos, CustomerBehaviour behaviour, float waitingAngerRateMultiplier, float orderAngerRateMultiplier, CustomerBehaviour.Seat seat, int recipeTier, ResolvableProfile skin) {
+        super(nodes, level, spawnPos, skin);
         this.seat = seat;
         this.recipeTier = recipeTier;
-        this.entity = new Mannequin(EntityTypes.MANNEQUIN, this.level);
-        ((MannequinAccessor) this.entity).cooking_frenzy$setMannequinProfile(skin);
-        this.entity.setInvulnerable(true);
-        this.entity.teleportTo(spawnPos.x(), spawnPos.y(), spawnPos.z());
         this.behaviour = behaviour;
         this.waitingAngerRateMultiplier = waitingAngerRateMultiplier;
         this.orderAngerRateMultiplier = orderAngerRateMultiplier;
@@ -81,11 +64,9 @@ public class Customer {
             System.out.println("Customer waiting Timeout: " + timeout);
         }
         this.seatEntity = seat.entity();
-        this.oldPos = this.entity.position();
         this.timeoutBar = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, this.level);
         this.orderDisplay = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, this.level);
         this.entity.playSound(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_ARRIVED));
-        this.level.addFreshEntity(this.entity);
     }
 
     private void sitDown() {
@@ -108,74 +89,17 @@ public class Customer {
         this.entity.removeTag("NoGravity");
         Vec3 pos = oldPos;
         this.entity.teleportTo(this.level, pos.x(), pos.y(), pos.z(), Set.of(), currentYaw, 0, false);
+        this.setShouldWalkReversePath(true);
         advanceNode(true);
     }
-    /**
-     * Advances through the node tree
-     * @param reverse Whether to walk the node tree in reverse (example, going back to spawn after sitting)
-     * @return if it was able to trace a path
-     */
-    public boolean advanceNode(boolean reverse) {
-        int oldNodeId = currentNodeId;
-        this.oldPos = this.entity.position();
-        if (reverse) {
-            currentNodeId--;
-        } else {
-            currentNodeId++;
-        }
 
-        if (reverse) {
-            if (currentNodeId < 0) {
-                this.despawnFlag = true;
-                return false;
-            }
-        } else if (currentNodeId >= nodes.size()) {
+    @Override
+    void onPathFinished() {
+        if (!this.hasReachedSeat) {
             this.sitDown();
-            return false;
+        } else {
+            this.despawnFlag = true;
         }
-
-        CustomerBehaviour.Node currentNode = null;
-        CustomerBehaviour.Node oldNode = null;
-        for (CustomerBehaviour.Node node : nodes) {
-            if (node.step() == currentNodeId) {
-                currentNode = node;
-            } else if (node.step() == oldNodeId) {
-                oldNode = node;
-            }
-        }
-
-        if (currentNode == null) {
-            this.pointToNavigate = null;
-            return false;
-        }
-        if (oldNode == null) {
-            oldNode = new CustomerBehaviour.Node(this.currentNodeId, new ArrayList<>(), currentNode.position());
-        }
-        this.pointToNavigate = currentNode.position();
-        this.distanceToPoint = oldNode.position().distanceTo(this.pointToNavigate);
-        // 4.317 is the base walk speed in blocks
-        this.timeToWalk = (long) ((this.distanceToPoint / (4.317 / 2)) * 20);
-        this.walkCounter = 0;
-        this.alpha = 1;
-        double dx = pointToNavigate.x - oldPos.x;
-        double dz = pointToNavigate.z - oldPos.z;
-        this.currentYaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-        return true;
-    }
-
-    private void pathfind() {
-        walkCounter++;
-        this.alpha = (double) walkCounter  / timeToWalk;
-        if (this.alpha > 1) {
-            if (advanceNode(hasReachedSeat)) {
-                this.alpha = (double) walkCounter / timeToWalk;
-            } else {
-                this.pointToNavigate = null;
-                return;
-            }
-        }
-        Vec3 pos = oldPos.lerp(this.pointToNavigate, this.alpha);
-        this.entity.teleportTo(this.level, pos.x(), pos.y(), pos.z(), Set.of(), currentYaw, 0, false);
     }
 
     private void setScore(int score) {
@@ -197,9 +121,7 @@ public class Customer {
     }
 
     public void tick() {
-        if (this.pointToNavigate != null) {
-            this.pathfind();
-        }
+        super.tick();
         if (this.hasReachedSeat && interactible) {
             if (this.timeout <= 0) {
                 this.entity.setXRot(0);
