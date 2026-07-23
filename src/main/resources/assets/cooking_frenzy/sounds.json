@@ -20,6 +20,9 @@
   "power_on": {
     "sounds": ["cooking_frenzy:power_on"]
   },
+  "fixing_door": {
+    "sounds": ["cooking_frenzy:fixing_door"]
+  },
   "song1": {
     "sounds": ["cooking_frenzy:song1"]
   },

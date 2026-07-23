@@ -13,6 +13,7 @@ import me.ellieis.cooking_frenzy.ui.ProgressBarComponent;
 import me.ellieis.cooking_frenzy.ui.spatial.attachment.PopUpAttachment;
 import me.ellieis.cooking_frenzy.ui.spatial.holder.DissapearingHolder;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,11 +31,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
+import xyz.nucleoid.map_templates.TemplateRegion;
 import xyz.nucleoid.stimuli.Stimuli;
 import xyz.nucleoid.stimuli.event.EventResult;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static me.ellieis.cooking_frenzy.ui.Common.mapRange;
 
@@ -52,8 +55,8 @@ public class Customer extends PathfinderNPC{
     Display.TextDisplay timeoutBar;
     float waitingAngerRateMultiplier;
     float orderAngerRateMultiplier;
-    public Customer(ArrayList<PathfinderNPC.Node> nodes, ServerLevel level, Vec3 spawnPos, CustomerBehaviour behaviour, float waitingAngerRateMultiplier, float orderAngerRateMultiplier, CustomerBehaviour.Seat seat, int recipeTier, ResolvableProfile skin) {
-        super(nodes, level, spawnPos, skin);
+    public Customer(ArrayList<CustomerNode> nodes, ServerLevel level, Vec3 spawnPos, CustomerBehaviour behaviour, float waitingAngerRateMultiplier, float orderAngerRateMultiplier, CustomerBehaviour.Seat seat, int recipeTier, ResolvableProfile skin) {
+        super(nodes.stream().map((node -> new Node(node.step(), node.position()))).collect(Collectors.toCollection(ArrayList::new)), level, spawnPos, skin);
         this.seat = seat;
         this.recipeTier = recipeTier;
         this.behaviour = behaviour;
@@ -190,6 +193,15 @@ public class Customer extends PathfinderNPC{
                     this.behaviour.onCustomerServed(this);
                 }
             }
+        }
+    }
+    public record CustomerNode(int step, ArrayList<Integer> options, Vec3 position) implements PathfinderNPC.NodeInterface {
+        public static CustomerNode fromRegion(TemplateRegion region) {
+            ArrayList<Integer> seatIds = new ArrayList<>();
+            for (Tag seats : region.getData().getList("seats").orElseThrow()) {
+                seatIds.add(seats.asInt().orElseThrow());
+            }
+            return new CustomerNode(region.getData().getInt("step").orElseThrow(), seatIds, region.getBounds().centerBottom());
         }
     }
 }

@@ -77,7 +77,7 @@ public class FreezerBehaviour extends DisableableBehaviour {
     final int targetPrecision;
     final int freezerDamage;
     public FreezerBehaviour(GameSpace gameSpace, GameActivity activity, ServerLevel level, MapWithFreezer map, Scheduler scheduler, GameModifiers currentModifiers, boolean debugMode) {
-        super(gameSpace, activity, debugMode, List.of(MalfunctionType.LIGHTS));
+        super(gameSpace, activity, debugMode, List.of(MalfunctionType.LIGHTS, MalfunctionType.FREEZER_MAINTENANCE));
         this.level = level;
         this.map = map;
         this.scheduler = scheduler;
@@ -258,6 +258,9 @@ public class FreezerBehaviour extends DisableableBehaviour {
                     }
                 }
             }
+            BlockPos pos = BlockPos.containing(active.getFreezerLight().getBounds().center());
+            BlockState state = level.getBlockState(pos);
+            level.setBlock(pos, state.setValue(BlockStateProperties.LIT, false), 2);
         }
     }
 
@@ -273,6 +276,9 @@ public class FreezerBehaviour extends DisableableBehaviour {
                     }
                 }
             }
+            BlockPos pos = BlockPos.containing(active.getFreezerLight().getBounds().center());
+            BlockState state = level.getBlockState(pos);
+            level.setBlock(pos, state.setValue(BlockStateProperties.LIT, true), 2);
         }
     }
 }

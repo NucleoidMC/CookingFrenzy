@@ -56,12 +56,17 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     TemplateRegion farmingButtonRedstoneBlock;
     TemplateRegion exitDetector;
 
-    TemplateRegion shopDrop;
+    // malfunctions
     List<TemplateRegion> lights;
+    TemplateRegion freezerLight;
     List<TemplateRegion> lightBreakerPlates;
     List<TemplateRegion> lightsArea;
     List<TemplateRegion> lightsBreaker;
     List<TemplateRegion> breakerDoors;
+    TemplateRegion maintenanceGuySpawn;
+    List<TemplateRegion> maintenanceNodes;
+
+    TemplateRegion shopDrop;
     List<TemplateRegion> singlePlayerRegions;
     List<TemplateRegion> multiPlayerRegions;
     GameModifiers modifiers;
@@ -109,12 +114,17 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
         this.farmingButtonRedstoneBlock = meta.getFirstRegion("farming_button_redstone_block");
         this.exitDetector = meta.getFirstRegion("farming_exit_detector");
 
-        this.shopDrop = meta.getFirstRegion("shop_drop");
+        // malfunctions
         this.lights = meta.getRegions("light").toList();
+        this.freezerLight = meta.getFirstRegion("freezer_light");
         this.lightBreakerPlates = meta.getRegions("light_breaker_plate").toList();
         this.lightsArea = meta.getRegions("lights_area").toList();
         this.lightsBreaker = meta.getRegions("lights_breaker").toList();
         this.breakerDoors = meta.getRegions("breaker_door").toList();
+        this.maintenanceGuySpawn = meta.getFirstRegion("freezer_maintenance_spawn");
+        this.maintenanceNodes = meta.getRegions("freezer_maintenance_node").toList();
+
+        this.shopDrop = meta.getFirstRegion("shop_drop");
         this.singlePlayerRegions = meta.getRegions("single_player").toList();
         this.multiPlayerRegions = meta.getRegions("multi_player").toList();
         this.tutorialCameraPositions = new TutorialCameraPositions(posFromMarker("customer_camera_angle"),
@@ -207,12 +217,17 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     public TemplateRegion getFarmingButtonRedstoneBlock() { return this.farmingButtonRedstoneBlock; }
     public boolean isInFarmingArea(ServerPlayer player) { return this.farmingArea.getBounds().contains(player.blockPosition()); }
 
-    public TemplateRegion getShopDrop() { return this.shopDrop; }
+    // malfunctions
     public List<TemplateRegion> getLights() { return this.lights; }
+    public TemplateRegion getFreezerLight() { return this.freezerLight; }
     public List<TemplateRegion> getLightBreakerPlates() { return this.lightBreakerPlates; }
     public List<TemplateRegion> getLightsArea() { return this.lightsArea; }
     public List<TemplateRegion> getLightsBreaker() { return this.lightsBreaker; }
     public List<TemplateRegion> getBreakerDoors() { return this.breakerDoors; }
+    public TemplateRegion getMaintenanceGuySpawn() { return this.maintenanceGuySpawn; }
+    public List<TemplateRegion> getMaintenanceNodes() { return this.maintenanceNodes; }
+
+    public TemplateRegion getShopDrop() { return this.shopDrop; }
     public List<TemplateRegion> getSinglePlayerRegions() { return this.singlePlayerRegions; }
     public List<TemplateRegion> getMultiPlayerRegions() { return this.multiPlayerRegions; }
 

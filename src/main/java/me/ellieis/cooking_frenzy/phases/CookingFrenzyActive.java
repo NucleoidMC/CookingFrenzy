@@ -3,6 +3,7 @@ package me.ellieis.cooking_frenzy.phases;
 import me.ellieis.cooking_frenzy.CookingFrenzy;
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.behaviours.*;
+import me.ellieis.cooking_frenzy.behaviours.malfunctions.FreezerMaintenanceBehaviour;
 import me.ellieis.cooking_frenzy.behaviours.malfunctions.LightsOutBehaviour;
 import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionBehaviour;
 import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionType;
@@ -167,11 +168,11 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
         this.songBehaviour = new SongBehaviour(gameSpace, activity, this.debugMode, false);
         this.behaviours.add(songBehaviour);
         this.behaviours.add(new RecipeMakerBehaviour(gameSpace, activity, level, map, debugMode));
-        this.behaviours.add(new LightsOutBehaviour(gameSpace, activity, this));
     }
 
     void setupMalfunctions(GameActivity activity) {
         this.malfunctions.add(new LightsOutBehaviour(gameSpace, activity, this));
+        this.malfunctions.add(new FreezerMaintenanceBehaviour(gameSpace, activity, this));
     }
 
     void updateWidgets() {

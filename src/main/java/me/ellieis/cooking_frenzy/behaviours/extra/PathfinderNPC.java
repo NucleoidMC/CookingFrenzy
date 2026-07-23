@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public abstract class PathfinderNPC {
-    ArrayList<Node> nodes;
+    ArrayList<NodeInterface> nodes;
     int currentNodeId;
     Vec3 pointToNavigate;
     Vec3 oldPos;
@@ -26,7 +26,7 @@ public abstract class PathfinderNPC {
     boolean walkReversePath = false;
     public boolean despawnFlag = false;
 
-    public PathfinderNPC(ArrayList<Node> nodes, ServerLevel level, Vec3 spawnPos, ResolvableProfile skin) {
+    public PathfinderNPC(ArrayList<NodeInterface> nodes, ServerLevel level, Vec3 spawnPos, ResolvableProfile skin) {
         this.nodes = nodes;
         this.level = level;
         this.currentNodeId = 0;
@@ -60,9 +60,9 @@ public abstract class PathfinderNPC {
             return false;
         }
 
-        Node currentNode = null;
-        Node oldNode = null;
-        for (Node node : nodes) {
+        NodeInterface currentNode = null;
+        NodeInterface oldNode = null;
+        for (NodeInterface node : nodes) {
             if (node.step() == currentNodeId) {
                 currentNode = node;
             } else if (node.step() == oldNodeId) {
@@ -75,7 +75,7 @@ public abstract class PathfinderNPC {
             return false;
         }
         if (oldNode == null) {
-            oldNode = new Node(this.currentNodeId, new ArrayList<>(), currentNode.position());
+            oldNode = new Node(this.currentNodeId, currentNode.position());
         }
         this.pointToNavigate = currentNode.position();
         this.distanceToPoint = oldNode.position().distanceTo(this.pointToNavigate);
@@ -120,6 +120,7 @@ public abstract class PathfinderNPC {
             this.pathfind();
         }
     }
-
-    public record Node(int step, ArrayList<Integer> options, Vec3 position) { }
-}
+    public interface NodeInterface {
+        int step();
+        Vec3 position();
+    }}

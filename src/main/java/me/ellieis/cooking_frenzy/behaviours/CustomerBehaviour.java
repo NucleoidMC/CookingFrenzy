@@ -50,7 +50,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
     final MapWithCustomer map;
     final CookingFrenzyPhase<T> game;
     TemplateRegion customerLights;
-    ArrayList<PathfinderNPC.Node> nodes = new ArrayList<>();
+    ArrayList<Customer.CustomerNode> nodes = new ArrayList<>();
     ArrayList<Seat> seats = new ArrayList<>();
     ArrayList<Customer> customers = new ArrayList<>();
     ArrayList<Customer> customersToDespawn = new ArrayList<>();
@@ -84,12 +84,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         }
 
         for (TemplateRegion nodeRegion : this.map.getCustomerNodes()) {
-            ArrayList<Integer> seatIds = new ArrayList<>();
-            for (Tag seats : nodeRegion.getData().getList("seats").orElseThrow()) {
-                seatIds.add(seats.asInt().orElseThrow());
-            }
-
-            this.nodes.add(new PathfinderNPC.Node(nodeRegion.getData().getInt("step").orElseThrow(), seatIds, nodeRegion.getBounds().centerBottom()));
+            this.nodes.add(Customer.CustomerNode.fromRegion(nodeRegion));
         }
         if (this.spawnCustomersAutomatically) {
             this.spawnCustomer(true);
@@ -255,10 +250,10 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         }
 
         Vec3 spawn = customerSpawns.get(ThreadLocalRandom.current().nextInt(customerSpawns.size())).getBounds().centerBottom();
-        ArrayList<PathfinderNPC.Node> path = calculatePathForSeat(seat);
+        ArrayList<Customer.CustomerNode> path = calculatePathForSeat(seat);
         // there are two node 0s, because there's two spawn positions. need to remove the other spawn pos
-        PathfinderNPC.Node nodeToDelete = null;
-        for (PathfinderNPC.Node node : path) {
+        Customer.CustomerNode nodeToDelete = null;
+        for (Customer.CustomerNode node : path) {
             if (node.step() == 0) {
                 if (node.position().distanceTo(spawn) >= 2) {
                     nodeToDelete = node;
@@ -306,9 +301,9 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
         return orders;
     }
 
-    private ArrayList<PathfinderNPC.Node> calculatePathForSeat(Seat seat) {
-        ArrayList<PathfinderNPC.Node> steps = new ArrayList<>();
-        for (PathfinderNPC.Node node : this.nodes) {
+    private ArrayList<Customer.CustomerNode> calculatePathForSeat(Seat seat) {
+        ArrayList<Customer.CustomerNode> steps = new ArrayList<>();
+        for (Customer.CustomerNode node : this.nodes) {
             if (node.options().contains(seat.id())) {
                 steps.add(node);
             }
