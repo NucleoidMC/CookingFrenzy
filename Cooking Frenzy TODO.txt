@@ -19,8 +19,7 @@ This way players can more accurately prepare for the upcoming recipes rather tha
 Bugs:
 
 Malfunctions:
-Lights out malfunction
-you have to go to the breaker with both players and they both have to match the lights panel of eachother (only one of them will be on in a random order)
+
 Upgrade Ideas:
 Tidier Freezer
 Increases the amount of snowballs that can be stored to exactly 10 (single use)
@@ -28,15 +27,8 @@ Increases the amount of snowballs that can be stored to exactly 10 (single use)
 Debuff Ideas:
 extra hunger
 
-freezer maintenance
-npc spawns to go look at the freezer (u cant get inside it)
-after a bit he asks you for shears to fix the wiring, and then 10s later goes away
-
 silverfish infestation
 you need to kill them with bug spray
 
 cash payment
 you have to give change to the customers
-
-power outages
-darkness effect and all recipe makers stop working

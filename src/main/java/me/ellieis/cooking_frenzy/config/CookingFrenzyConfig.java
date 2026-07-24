@@ -13,7 +13,7 @@ public record CookingFrenzyConfig(WaitingLobbyConfig playerConfig, boolean debug
     public static final MapCodec<CookingFrenzyConfig> CODEC = RecordCodecBuilder.mapCodec(instance ->
         instance.group(
                 WaitingLobbyConfig.CODEC.optionalFieldOf("players", new WaitingLobbyConfig(new PlayerLimiterConfig(OptionalInt.empty(), true), 1, 6, new WaitingLobbyConfig.Countdown(30, 5))).forGetter(CookingFrenzyConfig::playerConfig),
-                Codec.BOOL.optionalFieldOf("debug_mode", true).forGetter(CookingFrenzyConfig::debugMode)
+                Codec.BOOL.optionalFieldOf("debug_mode", false).forGetter(CookingFrenzyConfig::debugMode)
         ).apply(instance, CookingFrenzyConfig::new)
     );
 }

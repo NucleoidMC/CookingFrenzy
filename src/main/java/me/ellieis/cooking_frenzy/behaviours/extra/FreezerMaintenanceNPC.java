@@ -24,7 +24,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.phys.Vec3;
-import xyz.nucleoid.map_templates.TemplateRegion;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -64,6 +63,7 @@ public class FreezerMaintenanceNPC extends PathfinderNPC {
             level.addFreshEntity(itemDisplay);
             game.gameSpace.getPlayers().sendMessage(Component.translatable("cooking_frenzy.malfunctions.freezer_maintenance.dialog", Component.translatable("cooking_frenzy.malfunctions.freezer_maintenance.maintenance_guy").withStyle(ChatFormatting.YELLOW), Items.SHEARS.getDefaultInstance().getItemName().copy().withStyle(ChatFormatting.GREEN)));
             game.gameSpace.getPlayers().playSound(SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.BLOCKS, 1, 1);
+            this.entity.setGlowingTag(true);
         }
     }
 
@@ -98,6 +98,7 @@ public class FreezerMaintenanceNPC extends PathfinderNPC {
             this.level.playSound(null, this.entity.blockPosition(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.PLAYERS);
             this.entity.teleportTo(level, pos.x(), pos.y(), pos.z(), Set.of(), 0, 0, false);
             this.entity.setItemInHand(InteractionHand.MAIN_HAND, Items.SHEARS.getDefaultInstance());
+            this.entity.setGlowingTag(false);
             this.game.scheduler.addTask(new Task(this.game.time + SharedConstants.TICKS_PER_SECOND * 3, () -> {
                 this.level.playSound(null, this.entity.blockPosition(), SoundEvent.createVariableRangeEvent(CustomSounds.FIXING_DOOR), SoundSource.PLAYERS);
             }));
