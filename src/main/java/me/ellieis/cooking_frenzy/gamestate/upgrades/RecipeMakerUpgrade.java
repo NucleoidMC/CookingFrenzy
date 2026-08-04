@@ -1,16 +1,14 @@
 package me.ellieis.cooking_frenzy.gamestate.upgrades;
 
 import me.ellieis.cooking_frenzy.gamestate.GameState;
-import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
-import me.ellieis.cooking_frenzy.phases.CookingFrenzyActive;
-import me.ellieis.cooking_frenzy.phases.CookingFrenzyPhase;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.RecipeMaker;
 import me.ellieis.cooking_frenzy.phases.PhaseWithState;
 import net.minecraft.network.chat.Component;
 
 public class RecipeMakerUpgrade extends BaseUpgrade {
     RecipeMaker.RecipeMakerType type;
     public RecipeMakerUpgrade(int price, RecipeMaker.RecipeMakerType type) {
-        String translationKey = "cooking_frenzy.upgrades." + (type == RecipeMaker.RecipeMakerType.CRAFTER ? "crafter" : "furnace");
+        String translationKey = "cooking_frenzy.upgrades." + (type == RecipeMaker.RecipeMakerType.CRAFTER ? "crafter" : (type == RecipeMaker.RecipeMakerType.FURNACE) ? "furnace" : (type == RecipeMaker.RecipeMakerType.BREWER) ? "brewer" : "");
         super(Component.translatable(translationKey), Component.translatable(translationKey + ".desc"), price);
         this.type = type;
     }
@@ -23,7 +21,7 @@ public class RecipeMakerUpgrade extends BaseUpgrade {
     public void onBuy(PhaseWithState game) {
         if (this.type == RecipeMaker.RecipeMakerType.CRAFTER) {
             game.setState(game.getState().incrementCrafter());
-        } else {
+        } else if (this.type == RecipeMaker.RecipeMakerType.FURNACE) {
             game.setState(game.getState().incrementFurnace());
         }
     }

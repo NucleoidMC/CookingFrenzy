@@ -44,14 +44,21 @@ public class ShopBehaviour extends BaseBehaviour {
     CookingFrenzyActive game;
     ServerLevel level;
     public static ArrayList<ArrayList<ShopItem>> items = new ArrayList<>(List.of(
-            new ArrayList<>(List.of(
+           new ArrayList<>(List.of(
                     new ShopItem(5, Items.GLASS.getDefaultInstance()),
                     new ShopItem(5, Items.BROWN_MUSHROOM.getDefaultInstance()),
-                    new ShopItem(5, Items.RED_MUSHROOM.getDefaultInstance()))),
+                    new ShopItem(5, Items.RED_MUSHROOM.getDefaultInstance())
+           )),
            new ArrayList<>(List.of(
                    new ShopItem(10, Items.OAK_LOG.getDefaultInstance()),
                    new ShopItem(10, Items.RAW_IRON.getDefaultInstance()),
-                   new ShopItem(15, Items.RAW_GOLD.getDefaultInstance())))
+                   new ShopItem(15, Items.RAW_GOLD.getDefaultInstance())
+           )),
+           new ArrayList<>(List.of(
+                   ShopItem.EMPTY(),
+                   new ShopItem(10, Items.GUNPOWDER.getDefaultInstance()),
+                   ShopItem.EMPTY()
+           ))
     ));
     ArrayList<QueuedItem> itemQueue = new ArrayList<>();
     Vec3 dropPos;
@@ -85,6 +92,8 @@ public class ShopBehaviour extends BaseBehaviour {
                 long delay;
                 if (itemStack.equals(Items.RAW_GOLD) || itemStack.equals(Items.RAW_IRON)) {
                     delay = itemDelay / 2;
+                } else if (itemStack.equals(Items.GLASS)) {
+                    delay = Math.round(itemDelay / 1.5f);
                 } else {
                     delay = itemDelay;
                 }
@@ -111,6 +120,10 @@ public class ShopBehaviour extends BaseBehaviour {
             baseIndex = i * 9;
             baseIndex += 3;
             for (ShopItem shopItem : items.get(i - 1)) {
+                if (shopItem.equals(ShopItem.EMPTY())) {
+                    baseIndex++;
+                    continue;
+                }
                 gui.setSlot(baseIndex, GuiElementBuilder.from(shopItem.item()).setCallback(() -> {
                     buyItem(shopItem, player);
                 }));

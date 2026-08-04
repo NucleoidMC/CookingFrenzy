@@ -1,4 +1,4 @@
-package me.ellieis.cooking_frenzy.gamestate;
+package me.ellieis.cooking_frenzy.behaviours.recipemakers;
 
 import com.mojang.math.Transformation;
 import me.ellieis.cooking_frenzy.ui.ProgressBarComponent;
@@ -9,12 +9,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -30,6 +30,7 @@ public abstract class RecipeMaker {
     protected BlockPos indicatorPos;
     protected BlockPos buttonPos;
     protected BlockPos workingIndicatorPos;
+    @Nullable
     protected BlockState blockState;
     protected Display.TextDisplay timerDisplay;
     protected boolean isWorking = true;
@@ -39,14 +40,17 @@ public abstract class RecipeMaker {
     float timerMultiplier;
     boolean debugMode;
     public RecipeMaker(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, FrontAndTop orientation, BlockState blockState, int timer, float timerMultiplier, boolean debugMode) {
+        this(isUnlocked, isMain, isMaking, position, orientation, position.above(), position.above().relative(orientation.front(), 1), position.relative(orientation.front()).below(), blockState, timer, timerMultiplier, debugMode);
+    }
+    public RecipeMaker(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, FrontAndTop orientation, BlockPos indicatorPos, BlockPos buttonPos, BlockPos workingIndicatorPos, @Nullable BlockState blockState, int timer, float timerMultiplier, boolean debugMode) {
         this.isUnlocked = isUnlocked;
         this.isMain = isMain;
         this.isMaking = isMaking;
         this.position = position;
         this.orientation = orientation;
-        this.indicatorPos = this.position.above();
-        this.buttonPos = this.indicatorPos.relative(this.orientation.front(), 1);
-        this.workingIndicatorPos = this.position.relative(this.orientation().front()).below();
+        this.indicatorPos = indicatorPos;
+        this.buttonPos = buttonPos;
+        this.workingIndicatorPos = workingIndicatorPos;
         this.blockState = blockState;
         this.timer = timer;
         this.timerMultiplier = timerMultiplier;
@@ -115,8 +119,12 @@ public abstract class RecipeMaker {
 
     public void unlock(ServerLevel level) {
         this.isUnlocked = true;
-        level.setBlock(this.position, this.blockState, 2);
-        level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState(), 2);
+        if (this.blockState != null) {
+            level.setBlock(this.position, this.blockState, 2);
+        }
+        if (this.indicatorPos != null) {
+            level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState(), 2);
+        }
         level.setBlock(this.buttonPos, Blocks.SPRUCE_BUTTON.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, this.orientation.front()), 2);
         level.setBlock(this.workingIndicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);
     }
@@ -147,6 +155,7 @@ public abstract class RecipeMaker {
     public abstract void interact(ServerLevel level);
     public enum RecipeMakerType {
         CRAFTER,
-        FURNACE
+        FURNACE,
+        BREWER
     }
 }

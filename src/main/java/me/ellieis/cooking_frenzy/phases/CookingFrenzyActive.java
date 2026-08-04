@@ -10,7 +10,7 @@ import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionType;
 import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.GameState;
-import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.RecipeMaker;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.BaseUpgrade;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.DebtUpgrade;
 import me.ellieis.cooking_frenzy.map.Active;
@@ -137,6 +137,9 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
         }
         for (int i = 0; i < this.gameState.furnaceCount() - 1; i++) {
             map.unlockRecipeMaker(level, RecipeMaker.RecipeMakerType.FURNACE);
+        }
+        if (gameState.dayCount() > 2) {
+            map.unlockRecipeMaker(level, RecipeMaker.RecipeMakerType.BREWER);
         }
         checkSingleplayerStatus(false);
     }
@@ -313,7 +316,7 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
             }
         }
         if (time % SharedConstants.TICKS_PER_MINUTE == 0 && this.gameState.dayCount() > 1) {
-            if (ThreadLocalRandom.current().nextFloat() >= 0.9 * this.gameState.dayCount()) {
+            if (ThreadLocalRandom.current().nextFloat() >= 1 - (0.05 * this.gameState.dayCount())) {
                 startMalfunction();
             }
         }

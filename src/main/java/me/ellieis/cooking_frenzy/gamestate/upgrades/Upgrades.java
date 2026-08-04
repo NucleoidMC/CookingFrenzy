@@ -2,7 +2,7 @@ package me.ellieis.cooking_frenzy.gamestate.upgrades;
 
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.GameState;
-import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.RecipeMaker;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.modifier.DecrementModifierDebuff;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.modifier.IncrementModifierUpgrade;
 import net.minecraft.network.chat.Component;

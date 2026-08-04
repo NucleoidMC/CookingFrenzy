@@ -1,10 +1,10 @@
 package me.ellieis.cooking_frenzy.map;
 
 import me.ellieis.cooking_frenzy.CookingFrenzy;
-import me.ellieis.cooking_frenzy.gamestate.Crafter;
-import me.ellieis.cooking_frenzy.gamestate.Furnace;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.Crafter;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.Furnace;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
-import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.RecipeMaker;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -75,6 +75,13 @@ public class Lobby extends Map implements MapWithRecipeMaker, MapWithFreezer, Ma
         } else {
             return this.furnaces;
         }
+    }
+
+    public ArrayList<RecipeMaker> getAllRecipeMakers() {
+        ArrayList<RecipeMaker> recipeMakers = new ArrayList<>();
+        recipeMakers.addAll(this.crafters);
+        recipeMakers.addAll(this.furnaces);
+        return recipeMakers;
     }
 
     // freezer

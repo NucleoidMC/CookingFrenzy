@@ -8,7 +8,7 @@ import me.ellieis.cooking_frenzy.behaviours.*;
 import me.ellieis.cooking_frenzy.config.CookingFrenzyConfig;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.GameState;
-import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.RecipeMaker;
 import me.ellieis.cooking_frenzy.map.Lobby;
 import me.ellieis.cooking_frenzy.scheduler.Scheduler;
 import net.minecraft.core.BlockPos;
@@ -60,10 +60,7 @@ public class CookingFrenzyLobby extends CookingFrenzyPhase<Lobby> {
         spawnFloatingText("customer_text", Component.translatable("cooking_frenzy.lobby.customers"));
         this.customerButton = map.data.getFirstRegion("customer_button");
         this.scheduler = new Scheduler(0);
-        for (RecipeMaker recipeMaker : map.getRecipeMakers(RecipeMaker.RecipeMakerType.CRAFTER)) {
-            recipeMaker.unlock(level);
-        }
-        for (RecipeMaker recipeMaker : map.getRecipeMakers(RecipeMaker.RecipeMakerType.FURNACE)) {
+        for (RecipeMaker recipeMaker : map.getAllRecipeMakers()) {
             recipeMaker.unlock(level);
         }
         activity.listen(BlockBreakEvent.EVENT, (ServerPlayer _player, ServerLevel _level, BlockPos pos) -> {

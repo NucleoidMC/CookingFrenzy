@@ -1,11 +1,13 @@
 package me.ellieis.cooking_frenzy.map;
 
 import me.ellieis.cooking_frenzy.CookingFrenzy;
-import me.ellieis.cooking_frenzy.gamestate.Crafter;
-import me.ellieis.cooking_frenzy.gamestate.Furnace;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.Brewer;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.Crafter;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.Furnace;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
-import me.ellieis.cooking_frenzy.gamestate.RecipeMaker;
+import me.ellieis.cooking_frenzy.behaviours.recipemakers.RecipeMaker;
 import me.ellieis.cooking_frenzy.phases.CookingFrenzyActive;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +32,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     // recipe makers
     ArrayList<RecipeMaker> crafters = new ArrayList<>();
     ArrayList<RecipeMaker> furnaces = new ArrayList<>();
+    RecipeMaker brewer;
 
     // freezer
     List<TemplateRegion> meatProviders;
@@ -88,6 +91,13 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
             boolean main = region.getData().getBooleanOr("main", false);
             furnaces.add(new Furnace(main, main, false, region.getBounds().max(), FrontAndTop.valueOf(region.getData().getString("direction").orElse("EAST_UP").toUpperCase()), 0, modifiers.getModifier(GameModifiers.furnaceSpeedMultiplier), debugMode));
         });
+
+        BlockPos potionPos = BlockPos.containing(meta.getFirstRegion("potion_slot").getBounds().center());
+        BlockPos brewingPos = BlockPos.containing(meta.getFirstRegion("brewing_slot").getBounds().center());
+        BlockPos result = BlockPos.containing(meta.getFirstRegion("brewing_result").getBounds().center());
+        TemplateRegion brewerRegion = meta.getFirstRegion("brewer");
+        BlockPos brewerPos = BlockPos.containing(brewerRegion.getBounds().center());
+        brewer = new Brewer(false, false, false, brewerPos, potionPos, brewingPos, result, FrontAndTop.valueOf(brewerRegion.getData().getString("direction").orElse("EAST_UP").toUpperCase()), 0, 1, debugMode);
 
         // freezer
         this.meatProviders = meta.getRegions("meat_provider").toList();
@@ -165,8 +175,10 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
         ArrayList<RecipeMaker> makerList;
         if (type == RecipeMaker.RecipeMakerType.CRAFTER) {
             makerList = crafters;
-        } else {
+        } else if (type == RecipeMaker.RecipeMakerType.FURNACE) {
             makerList = furnaces;
+        } else {
+            makerList = new ArrayList<>(List.of(brewer));
         }
         for (RecipeMaker maker : makerList) {
             if (!maker.isUnlocked()) {
@@ -179,10 +191,21 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     public ArrayList<RecipeMaker> getRecipeMakers(RecipeMaker.RecipeMakerType type) {
         if (type == RecipeMaker.RecipeMakerType.CRAFTER) {
             return this.crafters;
-        } else {
+        } else if (type == RecipeMaker.RecipeMakerType.FURNACE) {
             return this.furnaces;
+        } else {
+            return new ArrayList<>(List.of(brewer));
         }
     }
+
+    public ArrayList<RecipeMaker> getAllRecipeMakers() {
+        ArrayList<RecipeMaker> recipeMakers = new ArrayList<>();
+        recipeMakers.addAll(this.crafters);
+        recipeMakers.addAll(this.furnaces);
+        recipeMakers.add(brewer);
+        return recipeMakers;
+    }
+
     // freezer
     public List<TemplateRegion> getMeatProviders() {
         return this.meatProviders;

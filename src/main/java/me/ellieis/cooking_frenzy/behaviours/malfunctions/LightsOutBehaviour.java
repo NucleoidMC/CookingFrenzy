@@ -16,6 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
@@ -206,10 +208,14 @@ public class LightsOutBehaviour extends BaseBehaviour implements MalfunctionBeha
             level.playSound(null, breakerDoor, BlockSetType.IRON.doorClose(), SoundSource.BLOCKS);
         }
         if (!lightsAreOn) {
+            gameSpace.getPlayers().addStatusEffect(new MobEffectInstance(MobEffects.DARKNESS, MobEffectInstance.INFINITE_DURATION));
             gameSpace.getPlayers().playSound(SoundEvent.createVariableRangeEvent(CustomSounds.POWER_OUT), SoundSource.AMBIENT, 1, 1);
             generateCode();
         } else {
-            gameSpace.getPlayers().playSound(SoundEvent.createVariableRangeEvent(CustomSounds.POWER_ON), SoundSource.AMBIENT, 1, 1);
+            for (ServerPlayer player : gameSpace.getPlayers()) {
+                player.removeEffect(MobEffects.DARKNESS);
+                PlayerUtil.playSoundToPlayer(player, SoundEvent.createVariableRangeEvent(CustomSounds.POWER_ON), SoundSource.AMBIENT, 1, 1);
+            }
             this.game.scheduler.addTask(new Task(game.time + 5 * SharedConstants.TICKS_PER_SECOND, () -> {
                 for (ArrayList<Boolean> booleans : breakerCode) {
                     booleans.clear();

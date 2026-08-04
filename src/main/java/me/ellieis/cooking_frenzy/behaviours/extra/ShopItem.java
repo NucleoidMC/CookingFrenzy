@@ -12,7 +12,7 @@ public record ShopItem(int price, ItemStack item) {
     public ShopItem {
         item.set(DataComponents.LORE, new ItemLore(List.of(Component.literal("$" + price).withStyle(ChatFormatting.GREEN))));
     }
-    static ShopItem EMPTY() {
+    public static ShopItem EMPTY() {
         return new ShopItem(-1, ItemStack.EMPTY);
     }
 }

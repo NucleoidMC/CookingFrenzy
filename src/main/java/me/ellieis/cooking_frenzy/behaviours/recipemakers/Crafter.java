@@ -1,4 +1,4 @@
-package me.ellieis.cooking_frenzy.gamestate;
+package me.ellieis.cooking_frenzy.behaviours.recipemakers;
 
 import me.ellieis.cooking_frenzy.events.ItemCraftedEvent;
 import net.minecraft.core.BlockPos;
@@ -13,7 +13,6 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrafterBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.entity.CrafterBlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -55,7 +54,7 @@ public class Crafter extends RecipeMaker {
         CrafterBlockEntity be = level.getBlockEntity(this.position, BlockEntityTypes.CRAFTER).get();
         if (CrafterBlock.getPotentialResults(level, be.asCraftInput()).isPresent()) {
             // 5 seconds per item
-            this.timer = Math.round((be.asCraftInput().items().size() * 100) * this.timerMultiplier);
+            this.timer = Math.round((be.asCraftInput().items().size() * 100) / this.timerMultiplier);
             this.maxTimer = timer;
             if (this.debugMode) {
                 System.out.println("Crafter Timer: " + timer);

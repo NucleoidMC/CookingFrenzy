@@ -1,4 +1,4 @@
-package me.ellieis.cooking_frenzy.gamestate;
+package me.ellieis.cooking_frenzy.behaviours.recipemakers;
 
 import me.ellieis.cooking_frenzy.CustomSounds;
 import me.ellieis.cooking_frenzy.events.FoodCookedEvent;
@@ -15,13 +15,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
@@ -65,7 +61,7 @@ public class Furnace extends RecipeMaker {
                 if (!recipe.isEmpty()) {
                     Item item = furnaceBe.getItem(0).getItem();
                     boolean isOre = item.equals(Items.RAW_IRON) || item.equals(Items.RAW_GOLD);
-                    this.timer = Math.round(((isOre) ? 15 * SharedConstants.TICKS_PER_SECOND : 30 * SharedConstants.TICKS_PER_SECOND) * this.timerMultiplier);
+                    this.timer = Math.round(((isOre) ? 15 * SharedConstants.TICKS_PER_SECOND : 30 * SharedConstants.TICKS_PER_SECOND) / this.timerMultiplier);
                     this.maxTimer = timer;
                     if (this.debugMode) {
                         System.out.println("Furnace Timer: " + timer);
