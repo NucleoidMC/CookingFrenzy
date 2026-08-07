@@ -10,6 +10,18 @@ public record SplashRecipe() implements PotionRecipe {
         return recipe.getItem().equals(Items.GUNPOWDER);
     }
 
+    public ItemStack basePotionDisplay() {
+        return Items.POTION.getDefaultInstance().copy();
+    }
+
+    public ItemStack ingredientDisplay() {
+        return Items.GUNPOWDER.getDefaultInstance();
+    }
+
+    public ItemStack resultDisplay() {
+        return Items.SPLASH_POTION.getDefaultInstance();
+    }
+
     public ItemStack getResult(PotionContents potion, ItemStack recipe) {
         if (testRecipe(potion, recipe)) {
             ItemStack item = new ItemStack(Items.SPLASH_POTION);

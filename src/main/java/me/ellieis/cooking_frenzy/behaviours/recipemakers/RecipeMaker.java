@@ -137,12 +137,16 @@ public abstract class RecipeMaker {
             if (this.isWorking) {
                 if (this.timer > 0) {
                     this.timer--;
-                    level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);
+                    if (this.indicatorPos != null) {
+                        level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);
+                    }
                     this.internalLoop(level);
                 } else {
                     this.isMaking = false;
                     this.maxTimer = 0;
-                    level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState(), 2);
+                    if (this.indicatorPos != null) {
+                        level.setBlock(this.indicatorPos, Blocks.COPPER_BULB.waxed().exposed().defaultBlockState(), 2);
+                    }
                     this.onMake(level);
                 }
             }

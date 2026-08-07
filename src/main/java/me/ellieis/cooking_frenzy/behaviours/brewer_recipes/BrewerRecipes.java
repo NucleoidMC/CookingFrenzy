@@ -6,13 +6,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BrewerRecipes {
     public static ArrayList<PotionRecipe> recipes = new ArrayList<>(List.of(
-            new BaseRecipe(new Potion("water"), Items.SUGAR.getDefaultInstance(), Items.HONEY_BOTTLE.getDefaultInstance()),
+            new BaseRecipe(Potions.WATER, Items.SUGAR.getDefaultInstance(), Items.HONEY_BOTTLE.getDefaultInstance()),
             new SplashRecipe()
     ));
 

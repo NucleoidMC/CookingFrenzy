@@ -69,6 +69,8 @@
   "cooking_frenzy.game_over": "Game Over",
 
   "cooking_frenzy.upgrades.title": "Select an upgrade",
+  "cooking_frenzy.upgrades.selected": "Upgrade Selected: %s",
+  "cooking_frenzy.upgrades.no_selection": "No Upgrade Selected",
   "cooking_frenzy.upgrades.next": "Skip Upgrades",
   "cooking_frenzy.upgrades.hotbar_slots": "Pants With Pockets",
   "cooking_frenzy.upgrades.hotbar_slots.desc": "Increase your hotbar slots by %s",
@@ -96,6 +98,7 @@
   "cooking_frenzy.upgrades.freezer_max.desc": "Increase the max amount of Snowballs to 10",
 
   "cooking_frenzy.debuffs.title": "Select a debuff",
+  "cooking_frenzy.debuffs.selected": "Debuff Selected: %s",
   "cooking_frenzy.debuffs.item_despawn_speed": "Kitchen Rats",
   "cooking_frenzy.debuffs.item_despawn_speed.desc": "Decrease the time it takes for an item to despawn by 10%%",
   "cooking_frenzy.debuffs.customer_spawn_rate_multiplier": "More Advertisements",

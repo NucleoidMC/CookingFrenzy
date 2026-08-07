@@ -17,12 +17,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,15 +37,14 @@ import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.fantasy.RuntimeLevelConfig;
-import xyz.nucleoid.map_templates.TemplateRegion;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.common.GlobalWidgets;
 import xyz.nucleoid.plasmid.api.game.common.widget.SidebarWidget;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
-import xyz.nucleoid.plasmid.api.game.event.GamePlayerEvents;
 import xyz.nucleoid.plasmid.api.game.player.JoinIntent;
 import xyz.nucleoid.plasmid.api.game.rule.GameRuleType;
+import xyz.nucleoid.plasmid.api.util.PlayerUtil;
 import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
 import xyz.nucleoid.stimuli.event.entity.EntityDamageEvent;
@@ -162,6 +162,8 @@ public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements Pha
                     updateSidebar();
                     upgrade.onBuy(this);
                     for (ServerPlayer gameSpacePlayer : gameSpace.getPlayers()) {
+                        PlayerUtil.playSoundToPlayer(gameSpacePlayer, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
+                        gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.upgrades.selected", upgrade.name.copy().withStyle(style -> style.withBold(true).withColor(ChatFormatting.GREEN).withHoverEvent(new HoverEvent.ShowText(upgrade.desc)))));
                         if (gameSpacePlayer.hasContainerOpen()) {
                             gameSpacePlayer.closeContainer();
                             openDebuffGui(player);
@@ -179,6 +181,8 @@ public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements Pha
         ui.setSlot(8, GuiElementBuilder.from(item).setCallback(() -> {
             this.pickedUpgrade = true;
             for (ServerPlayer gameSpacePlayer : gameSpace.getPlayers()) {
+                PlayerUtil.playSoundToPlayer(gameSpacePlayer, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
+                gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.upgrades.no_selection"));
                 if (gameSpacePlayer.hasContainerOpen()) {
                     gameSpacePlayer.closeContainer();
                     openDebuffGui(player);
@@ -199,6 +203,8 @@ public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements Pha
             ui.setSlot(i, GuiElementBuilder.from(item).setCallback(clickType -> {
                 debuff.onBuy(this);
                 for (ServerPlayer gameSpacePlayer : gameSpace.getPlayers()) {
+                    PlayerUtil.playSoundToPlayer(gameSpacePlayer, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
+                    gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.debuffs.selected", debuff.name.copy().withStyle(style -> style.withBold(true).withColor(ChatFormatting.RED).withHoverEvent(new HoverEvent.ShowText(debuff.desc)))));
                     if (gameSpacePlayer.hasContainerOpen()) {
                         gameSpacePlayer.closeContainer();
                     }

@@ -138,9 +138,6 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
         for (int i = 0; i < this.gameState.furnaceCount() - 1; i++) {
             map.unlockRecipeMaker(level, RecipeMaker.RecipeMakerType.FURNACE);
         }
-        if (gameState.dayCount() > 2) {
-            map.unlockRecipeMaker(level, RecipeMaker.RecipeMakerType.BREWER);
-        }
         checkSingleplayerStatus(false);
     }
 

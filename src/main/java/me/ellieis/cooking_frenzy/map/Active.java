@@ -92,12 +92,13 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
             furnaces.add(new Furnace(main, main, false, region.getBounds().max(), FrontAndTop.valueOf(region.getData().getString("direction").orElse("EAST_UP").toUpperCase()), 0, modifiers.getModifier(GameModifiers.furnaceSpeedMultiplier), debugMode));
         });
 
-        BlockPos potionPos = BlockPos.containing(meta.getFirstRegion("potion_slot").getBounds().center());
-        BlockPos brewingPos = BlockPos.containing(meta.getFirstRegion("brewing_slot").getBounds().center());
+        TemplateRegion potion = meta.getFirstRegion("potion_slot");
+        TemplateRegion ingredient = meta.getFirstRegion("brewing_slot");
         BlockPos result = BlockPos.containing(meta.getFirstRegion("brewing_result").getBounds().center());
         TemplateRegion brewerRegion = meta.getFirstRegion("brewer");
         BlockPos brewerPos = BlockPos.containing(brewerRegion.getBounds().center());
-        brewer = new Brewer(false, false, false, brewerPos, potionPos, brewingPos, result, FrontAndTop.valueOf(brewerRegion.getData().getString("direction").orElse("EAST_UP").toUpperCase()), 0, 1, debugMode);
+        BlockPos brewerRecipePos = BlockPos.containing(meta.getFirstRegion("brewer_recipes").getBounds().center());
+        brewer = new Brewer(false, false, false, brewerPos, potion, ingredient, brewerRecipePos, result, FrontAndTop.valueOf(brewerRegion.getData().getString("direction").orElse("EAST_UP").toUpperCase()), 0, 1, debugMode);
 
         // freezer
         this.meatProviders = meta.getRegions("meat_provider").toList();
@@ -169,6 +170,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
                 break;
             }
         }
+        brewer.unlock(level);
     }
 
     public void unlockRecipeMaker(ServerLevel level, RecipeMaker.RecipeMakerType type) {
