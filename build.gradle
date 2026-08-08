@@ -76,6 +76,11 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}" }
     }
+    from("src/main/resources/data/cooking_frenzy/lang/") {
+        include("pt_br.json")
+        rename("pt_br.json", "pt_pt.json")
+        into("data/cooking_frenzy/lang")
+    }
 }
 
 // configure the maven publication
