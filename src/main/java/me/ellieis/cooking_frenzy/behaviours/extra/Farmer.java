@@ -32,25 +32,28 @@ public class Farmer {
         hoe.setDamageValue(hoe.getMaxDamage() - 2);
         this.shopItems = new ArrayList<>(List.of(
                 new ArrayList<>(List.of(
-                        new ShopItem(30, Items.WHEAT_SEEDS.getDefaultInstance()),
+                        ShopItem.EMPTY(),
                         new ShopItem(30, Items.CARROT.getDefaultInstance()),
-                        new ShopItem(30, Items.POTATO.getDefaultInstance())
+                        new ShopItem(30, Items.POTATO.getDefaultInstance()),
+                        ShopItem.EMPTY()
                 )),
                 new ArrayList<>(List.of(
-                        new ShopItem(30, Items.BEETROOT_SEEDS.getDefaultInstance()),
+                        new ShopItem(30, Items.WHEAT_SEEDS.getDefaultInstance()),
+                        new ShopItem(5, hoe, ItemStack.EMPTY),
+                        new ShopItem(5, hoe, ItemStack.EMPTY),
+                        new ShopItem(30, Items.BEETROOT_SEEDS.getDefaultInstance())
+                )),
+                new ArrayList<>(List.of(
                         new ShopItem(30, Items.MELON_SEEDS.getDefaultInstance()),
+                        new ShopItem(5, Items.BONE_MEAL.getDefaultInstance(), ItemStack.EMPTY),
+                        new ShopItem(5, Items.BONE_MEAL.getDefaultInstance(), ItemStack.EMPTY),
                         new ShopItem(30, Items.PUMPKIN_SEEDS.getDefaultInstance())
                 )),
                 new ArrayList<>(List.of(
                         ShopItem.EMPTY(),
                         new ShopItem(30, Items.COCOA_BEANS.getDefaultInstance()),
-                        ShopItem.EMPTY()
-                )),
-                new ArrayList<>(),
-                new ArrayList<>(List.of(
                         new ShopItem(5, Items.SUGAR_CANE.getDefaultInstance()),
-                        new ShopItem(5, hoe),
-                        new ShopItem(5, Items.BONE_MEAL.getDefaultInstance())
+                        ShopItem.EMPTY()
                 ))
         )
         );
@@ -61,15 +64,15 @@ public class Farmer {
         }
         SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x6, player, false);
         gui.setTitle(GuiTextures.FARMER_SHOP.apply(Component.empty()));
-        for (int i = 0; i < 5; i++) {
-            int baseIndex = i * 9;
-            baseIndex += 3;
+        for (int i = 0; i < 4; i++) {
+            int baseIndex = (i + 1) * 9;
+            baseIndex += 4;
             for (ShopItem item : shopItems.get(i)) {
                 if (item.price() == -1) {
                     baseIndex++;
                     continue;
                 }
-                gui.setSlot(baseIndex, GuiElementBuilder.from(item.item()).setCallback(() -> {
+                gui.setSlot(baseIndex, GuiElementBuilder.from(item.displayItem()).setCallback(() -> {
                     buyItem(player, item);
                 }));
                 baseIndex++;

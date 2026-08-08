@@ -57,6 +57,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     TemplateRegion farmingBarrier;
     TemplateRegion farmingMinecartButton;
     TemplateRegion farmingButtonRedstoneBlock;
+    TemplateRegion farmingPlateRedstoneBlock;
     TemplateRegion exitDetector;
 
     // malfunctions
@@ -124,6 +125,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
         this.farmingBarrier = meta.getFirstRegion("farming_barrier");
         this.farmingMinecartButton = meta.getFirstRegion("farming_minecart_button");
         this.farmingButtonRedstoneBlock = meta.getFirstRegion("farming_button_redstone_block");
+        this.farmingPlateRedstoneBlock = meta.getFirstRegion("farming_plate_redstone_block");
         this.exitDetector = meta.getFirstRegion("farming_exit_detector");
 
         // malfunctions
@@ -242,6 +244,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     public TemplateRegion getExitDetector() { return this.exitDetector; }
     public TemplateRegion getFarmingMinecartButton() { return this.farmingMinecartButton; }
     public TemplateRegion getFarmingButtonRedstoneBlock() { return this.farmingButtonRedstoneBlock; }
+    public TemplateRegion getFarmingPlateRedstoneBlock() { return this.farmingPlateRedstoneBlock; }
     public boolean isInFarmingArea(ServerPlayer player) { return this.farmingArea.getBounds().contains(player.blockPosition()); }
 
     // malfunctions

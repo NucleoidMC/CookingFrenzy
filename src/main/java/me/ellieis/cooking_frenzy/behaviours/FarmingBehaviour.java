@@ -82,17 +82,22 @@ public class FarmingBehaviour extends DisableableBehaviour {
     CookingFrenzyActive game;
     BlockPos singlePlayerButtonPos;
     BlockPos farmingButtonRedstoneBlock;
+    BlockPos farmingPlateRedstoneBlock;
+    BlockPos insideFarmingButtonPos;
     ArrayList<Item> seeds = new ArrayList<>(List.of(Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.POTATO, Items.CARROT, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS));
     public FarmingBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyActive game) {
         super(gameSpace, activity, game.debugMode, List.of(MalfunctionType.LIGHTS));
         this.level = game.level;
         this.farmingPlatePos = BlockPos.containing(game.map.getFarmingPlate().getBounds().center());
         this.exitDetectorPos = BlockPos.containing(game.map.getExitDetector().getBounds().center());
+        this.insideFarmingButtonPos = BlockPos.containing(game.map.getFarmingMinecartButton().getBounds().center());
         this.farmingBarrier = game.map.getFarmingBarrier();
         this.scheduler = game.scheduler;
         this.farmer = new Farmer(game);
         this.game = game;
         this.farmingButtonRedstoneBlock = BlockPos.containing(game.map.getFarmingButtonRedstoneBlock().getBounds().center());
+        this.farmingPlateRedstoneBlock = BlockPos.containing(game.map.getFarmingPlateRedstoneBlock().getBounds().center());
+
         this.cropGrowTime = Math.round(SharedConstants.TICKS_PER_MINUTE / game.gameState.currentModifiers().getModifier(GameModifiers.cropGrowthSpeedMultiplier));
         for (TemplateRegion region : this.game.map.getSinglePlayerRegions()) {
             if (region.getData().getBooleanOr("farming", false)) {
@@ -221,14 +226,22 @@ public class FarmingBehaviour extends DisableableBehaviour {
         }
 
         powered = this.level.getBlockState(this.exitDetectorPos).getValue(PressurePlateBlock.POWERED);
-        BlockState button = this.level.getBlockState(this.singlePlayerButtonPos);
-        if (button.getBlock() != Blocks.AIR) {
-            powered = powered || button.getValue(BlockStateProperties.POWERED);
+        BlockState spButton = this.level.getBlockState(this.singlePlayerButtonPos);
+        BlockState insideMinecartButton = this.level.getBlockState(this.insideFarmingButtonPos);
+        if (spButton.getBlock() != Blocks.AIR) {
+            // prevents players from being stuck inside with no exit in singleplayer if the minecart is not at the farm
+            powered = powered || spButton.getValue(BlockStateProperties.POWERED) || insideMinecartButton.getValue(BlockStateProperties.POWERED);
         }
+
         if (debounce && powered && !this.isEntranceOpen) {
             for (BlockPos bound : this.farmingBarrier.getBounds()) {
                 this.level.setBlock(bound, Blocks.AIR.defaultBlockState(), 2);
             }
+            // useful if ur stuck in farming with no minecart in singleplayer
+            if (spButton.getBlock() != Blocks.AIR && insideMinecartButton.getValue(BlockStateProperties.POWERED)) {
+                this.level.setBlockAndUpdate(this.farmingPlateRedstoneBlock, Blocks.REDSTONE_BLOCK.defaultBlockState());
+            }
+
             this.level.setBlockAndUpdate(this.farmingButtonRedstoneBlock, Blocks.REDSTONE_BLOCK.defaultBlockState());
             this.level.setBlockAndUpdate(BlockPos.containing(this.farmingBarrier.getBounds().centerBottom()), Blocks.RAIL.defaultBlockState());
             debounce = false;
@@ -238,6 +251,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
                         this.level.setBlock(bound, Blocks.BARRIER.defaultBlockState(), 2);
                     }
                     this.level.setBlockAndUpdate(this.farmingButtonRedstoneBlock, Blocks.AIR.defaultBlockState());
+                    this.level.setBlockAndUpdate(this.farmingPlateRedstoneBlock, Blocks.AIR.defaultBlockState());
                 }
                 debounce = true;
             })));

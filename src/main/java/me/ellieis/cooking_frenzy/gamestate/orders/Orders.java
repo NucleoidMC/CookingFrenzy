@@ -28,7 +28,8 @@ public class Orders {
             BaseOrder.inSeconds(Items.MUSHROOM_STEW, 180, 2),
             BaseOrder.inSeconds(Items.PUMPKIN_PIE, 180, 2),
             BaseOrder.inSeconds(Items.COOKIE, 180, 2),
-            BaseOrder.inSeconds(Items.COOKED_BEEF, 150, 2)
+            BaseOrder.inSeconds(Items.COOKED_BEEF, 150, 2),
+            BaseOrder.inSeconds(Items.HONEY_BOTTLE, 210, 2)
             ));
     public static ArrayList<BaseOrder> TIER3 = new ArrayList<>(List.of(
             BaseOrder.inSeconds(Items.CAKE, 270, 3, 200),

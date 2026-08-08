@@ -113,10 +113,10 @@ public class ShopBehaviour extends BaseBehaviour {
         if (player.gameMode() != GameType.SURVIVAL) {
             return;
         }
-        SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x4, player, false);
+        SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x5, player, false);
         gui.setTitle(Component.translatable("cooking_frenzy.shop"));
         int baseIndex;
-        for (int i = 1; i < 3; i++) {
+        for (int i = 1; i < 4; i++) {
             baseIndex = i * 9;
             baseIndex += 3;
             for (ShopItem shopItem : items.get(i - 1)) {
@@ -124,7 +124,7 @@ public class ShopBehaviour extends BaseBehaviour {
                     baseIndex++;
                     continue;
                 }
-                gui.setSlot(baseIndex, GuiElementBuilder.from(shopItem.item()).setCallback(() -> {
+                gui.setSlot(baseIndex, GuiElementBuilder.from(shopItem.displayItem()).setCallback(() -> {
                     buyItem(shopItem, player);
                 }));
                 baseIndex++;
@@ -145,7 +145,7 @@ public class ShopBehaviour extends BaseBehaviour {
             baseIndex = i * 9;
             baseIndex += 3;
             for (ShopItem shopItem : items.get(i - 1)) {
-                gui.setSlot(baseIndex, GuiElementBuilder.from(shopItem.item()));
+                gui.setSlot(baseIndex, GuiElementBuilder.from(shopItem.displayItem()));
                 baseIndex++;
             }
         }
