@@ -33,6 +33,7 @@ public class Brewer extends RecipeMaker {
     BlockPos brewerRecipePos;
     BlockPos result;
     Result currentRecipe = null;
+    public RecipeMakerType recipeMakerType = RecipeMakerType.BREWER;
     public Brewer(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, TemplateRegion potionSlot, TemplateRegion brewingSlot, BlockPos brewerRecipePos, BlockPos result, FrontAndTop orientation, int timer, float timerMultiplier, boolean debugMode) {
         super(isUnlocked, isMain, isMaking, position, orientation, null, position.relative(orientation.front()), position.relative(orientation.front()).below(), Blocks.POLISHED_TUFF.defaultBlockState(), timer, timerMultiplier, debugMode);
         this.potionSlot = potionSlot;
@@ -87,7 +88,7 @@ public class Brewer extends RecipeMaker {
             potion.setTransformation(scale);
             Display.TextDisplay plusSymbol = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, level);
             plusSymbol.setText(Component.literal("+"));
-            plusSymbol.setPos(baseLinePos.add(0.3f, -0.1, 0));
+            plusSymbol.setPos(baseLinePos.add(0.35f, -0.1, 0));
             plusSymbol.setTransformation(scale);
             Display.ItemDisplay ingredient = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, level);
             ingredient.setItemStack(recipe.ingredientDisplay());
@@ -132,7 +133,7 @@ public class Brewer extends RecipeMaker {
             if (BrewerRecipes.isValidRecipe(result.potion(), result.recipe())) {
                 clearItems(level);
                 currentRecipe = result;
-                this.timer = 30 * SharedConstants.TICKS_PER_SECOND;
+                this.timer = 15 * SharedConstants.TICKS_PER_SECOND;
                 this.maxTimer = timer;
                 this.isMaking = true;
                 level.setBlock(this.buttonPos, Blocks.SPRUCE_BUTTON.defaultBlockState().setValue(BlockStateProperties.POWERED, true).setValue(HorizontalDirectionalBlock.FACING, this.orientation.front()), 2);

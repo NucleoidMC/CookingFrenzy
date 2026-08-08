@@ -23,8 +23,10 @@ import java.util.List;
 public class RecipeMakerBehaviour extends DisableableBehaviour {
     MapWithRecipeMaker map;
     ServerLevel level;
+    boolean isFurnaceDisabled = false;
+    boolean isCrafterDisabled = false;
     public RecipeMakerBehaviour(GameSpace gameSpace, GameActivity activity, ServerLevel level, MapWithRecipeMaker map, boolean debugMode) {
-        super(gameSpace, activity, debugMode, List.of(MalfunctionType.LIGHTS));
+        super(gameSpace, activity, debugMode, List.of(MalfunctionType.LIGHTS, MalfunctionType.KITCHEN_FIRE), true);
         this.map = map;
         this.level = level;
     }
@@ -39,22 +41,15 @@ public class RecipeMakerBehaviour extends DisableableBehaviour {
             ArrayList<RecipeMaker> recipeMakers = map.getAllRecipeMakers();
             for (RecipeMaker recipeMaker : recipeMakers) {
                 if (recipeMaker.isUnlocked() && !recipeMaker.isMaking() && recipeMaker.buttonPos().equals(blockHitResult.getBlockPos())) {
-                    if (this.isDisabled) return InteractionResult.FAIL;
+                    if (!recipeMaker.isWorking) return InteractionResult.FAIL;
                     recipeMaker.interact(this.level);
                     return InteractionResult.FAIL;
                 }
             }
         } else if (block instanceof CrafterBlock || block instanceof AbstractFurnaceBlock) {
-            ArrayList<RecipeMaker> crafters = map.getRecipeMakers(RecipeMaker.RecipeMakerType.CRAFTER);
-            ArrayList<RecipeMaker> furnaces = map.getRecipeMakers(RecipeMaker.RecipeMakerType.FURNACE);
-
-            for (RecipeMaker recipeMaker : crafters) {
-                if ((recipeMaker.isMaking() || this.isDisabled) && recipeMaker.position().equals(blockHitResult.getBlockPos())) {
-                    return InteractionResult.FAIL;
-                }
-            }
-            for (RecipeMaker recipeMaker : furnaces) {
-                if ((recipeMaker.isMaking() || this.isDisabled) && recipeMaker.position().equals(blockHitResult.getBlockPos())) {
+            ArrayList<RecipeMaker> recipeMakers = map.getAllRecipeMakers();
+            for (RecipeMaker recipeMaker : recipeMakers) {
+                if ((recipeMaker.isMaking() || !recipeMaker.isWorking) && recipeMaker.position().equals(blockHitResult.getBlockPos())) {
                     return InteractionResult.FAIL;
                 }
             }
@@ -68,23 +63,49 @@ public class RecipeMakerBehaviour extends DisableableBehaviour {
             recipeMaker.tickTimer(this.level);
         }
     }
-    void setEnabled(boolean val) {
-        ArrayList<RecipeMaker> recipeMakers = map.getAllRecipeMakers();
+
+    void setEnabled(RecipeMaker.RecipeMakerType type, boolean val) {
+        ArrayList<RecipeMaker> recipeMakers = map.getRecipeMakers(type);
         for (RecipeMaker recipeMaker : recipeMakers) {
             if (recipeMaker.isUnlocked()) {
                 recipeMaker.setIsWorking(level, val);
             }
         }
+
+        if (type == RecipeMaker.RecipeMakerType.CRAFTER) {
+            isCrafterDisabled = !val;
+        } else if (type == RecipeMaker.RecipeMakerType.FURNACE) {
+            isFurnaceDisabled = !val;
+        }
     }
+
+    boolean shouldDisableCrafter() {
+        return this.malfunctionsAffectingBehaviour.contains(MalfunctionType.LIGHTS);
+    }
+
+    boolean shouldDisableFurnace() {
+        return this.malfunctionsAffectingBehaviour.contains(MalfunctionType.KITCHEN_FIRE) || this.malfunctionsAffectingBehaviour.contains(MalfunctionType.LIGHTS);
+    }
+
+    boolean shouldDisableBrewer(){
+        return this.malfunctionsAffectingBehaviour.contains(MalfunctionType.LIGHTS);
+    }
+
     @Override
     void onDisable(MalfunctionType reason) {
-        setEnabled(false);
+        // need to do this so the disable functions can know the reason
+        this.malfunctionsAffectingBehaviour.add(reason);
+        setEnabled(RecipeMaker.RecipeMakerType.FURNACE, !shouldDisableFurnace());
+        setEnabled(RecipeMaker.RecipeMakerType.CRAFTER, !shouldDisableCrafter());
+        setEnabled(RecipeMaker.RecipeMakerType.BREWER, !shouldDisableBrewer());
+        // make sure to remove because it gets added by DisableableBehaviour automatically
+        this.malfunctionsAffectingBehaviour.remove(reason);
     }
 
     @Override
     void onEnable(MalfunctionType reason) {
-        if (this.malfunctionsAffectingBehaviour.isEmpty()) {
-            setEnabled(true);
-        }
+        setEnabled(RecipeMaker.RecipeMakerType.FURNACE, !shouldDisableFurnace());
+        setEnabled(RecipeMaker.RecipeMakerType.CRAFTER, !shouldDisableCrafter());
+        setEnabled(RecipeMaker.RecipeMakerType.BREWER, !shouldDisableBrewer());
     }
 }

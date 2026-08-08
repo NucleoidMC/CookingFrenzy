@@ -9,6 +9,11 @@ import java.util.List;
 
 public abstract class DisableableBehaviour extends BaseBehaviour {
     protected boolean isDisabled;
+    /**
+     * Whether to receive disable events more than once if this behaviour gets disabled by more than one source.
+     * Good to enable for behaviours where only certain parts would get disabled depending on the disable type
+     */
+    protected boolean receiveMultipleDisableEvents = false;
     protected ArrayList<MalfunctionType> disableTypes;
     protected ArrayList<MalfunctionType> malfunctionsAffectingBehaviour = new ArrayList<>();
     public DisableableBehaviour(GameSpace gameSpace, GameActivity activity, boolean debugMode, List<MalfunctionType> disableTypes) {
@@ -16,9 +21,13 @@ public abstract class DisableableBehaviour extends BaseBehaviour {
         this.disableTypes = new ArrayList<>(disableTypes);
     }
 
+    public DisableableBehaviour(GameSpace gameSpace, GameActivity activity, boolean debugMode, List<MalfunctionType> disableTypes, boolean receiveMultipleDisableEvents) {
+        this(gameSpace, activity, debugMode, disableTypes);
+        this.receiveMultipleDisableEvents = receiveMultipleDisableEvents;
+    }
     public void disableBehaviour(MalfunctionType reason) {
         if (this.disableTypes.contains(reason)) {
-            if (this.malfunctionsAffectingBehaviour.isEmpty()) {
+            if (this.malfunctionsAffectingBehaviour.isEmpty() || this.receiveMultipleDisableEvents) {
                 this.isDisabled = true;
                 this.onDisable(reason);
             }
@@ -29,7 +38,7 @@ public abstract class DisableableBehaviour extends BaseBehaviour {
     public void enableBehaviour(MalfunctionType reason) {
         if (this.disableTypes.contains(reason)) {
             this.malfunctionsAffectingBehaviour.remove(reason);
-            if (this.malfunctionsAffectingBehaviour.isEmpty()) {
+            if (this.malfunctionsAffectingBehaviour.isEmpty() || this.receiveMultipleDisableEvents) {
                 this.isDisabled = false;
                 this.onEnable(reason);
             }

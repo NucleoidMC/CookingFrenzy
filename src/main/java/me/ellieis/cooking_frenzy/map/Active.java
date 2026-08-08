@@ -68,6 +68,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     List<TemplateRegion> breakerDoors;
     TemplateRegion maintenanceGuySpawn;
     List<TemplateRegion> maintenanceNodes;
+    TemplateRegion kitchenFireArea;
 
     TemplateRegion shopDrop;
     List<TemplateRegion> singlePlayerRegions;
@@ -134,6 +135,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
         this.breakerDoors = meta.getRegions("breaker_door").toList();
         this.maintenanceGuySpawn = meta.getFirstRegion("freezer_maintenance_spawn");
         this.maintenanceNodes = meta.getRegions("freezer_maintenance_node").toList();
+        this.kitchenFireArea = meta.getFirstRegion("kitchen_fire_surface");
 
         this.shopDrop = meta.getFirstRegion("shop_drop");
         this.singlePlayerRegions = meta.getRegions("single_player").toList();
@@ -251,6 +253,7 @@ public class Active extends Map implements MapWithRecipeMaker, MapWithFreezer, M
     public List<TemplateRegion> getBreakerDoors() { return this.breakerDoors; }
     public TemplateRegion getMaintenanceGuySpawn() { return this.maintenanceGuySpawn; }
     public List<TemplateRegion> getMaintenanceNodes() { return this.maintenanceNodes; }
+    public TemplateRegion getKitchenFireArea() { return this.kitchenFireArea; }
 
     public TemplateRegion getShopDrop() { return this.shopDrop; }
     public List<TemplateRegion> getSinglePlayerRegions() { return this.singlePlayerRegions; }

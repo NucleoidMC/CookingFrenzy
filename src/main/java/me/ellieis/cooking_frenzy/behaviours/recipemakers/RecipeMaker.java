@@ -33,12 +33,14 @@ public abstract class RecipeMaker {
     @Nullable
     protected BlockState blockState;
     protected Display.TextDisplay timerDisplay;
-    protected boolean isWorking = true;
+    public boolean isWorking = true;
     boolean blinking = false;
     int maxTimer;
     int timer;
     float timerMultiplier;
     boolean debugMode;
+    public RecipeMakerType recipeMakerType;
+
     public RecipeMaker(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, FrontAndTop orientation, BlockState blockState, int timer, float timerMultiplier, boolean debugMode) {
         this(isUnlocked, isMain, isMaking, position, orientation, position.above(), position.above().relative(orientation.front(), 1), position.relative(orientation.front()).below(), blockState, timer, timerMultiplier, debugMode);
     }

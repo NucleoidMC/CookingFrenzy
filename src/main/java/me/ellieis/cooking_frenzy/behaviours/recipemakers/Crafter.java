@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.stimuli.Stimuli;
 
 public class Crafter extends RecipeMaker {
+    public RecipeMakerType recipeMakerType = RecipeMakerType.CRAFTER;
     public Crafter(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, FrontAndTop orientation, int timer, float timerMultiplier, boolean debugMode) {
         super(isUnlocked, isMain, isMaking, position, orientation, Blocks.CRAFTER.defaultBlockState().setValue(BlockStateProperties.ORIENTATION, orientation), timer, timerMultiplier, debugMode);
     }

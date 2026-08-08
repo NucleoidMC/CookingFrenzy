@@ -24,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import xyz.nucleoid.stimuli.Stimuli;
 
 public class Furnace extends RecipeMaker {
+    public RecipeMakerType recipeMakerType = RecipeMakerType.FURNACE;
     public Furnace(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, FrontAndTop orientation, int timer, float timerMultiplier, boolean debugMode) {
         super(isUnlocked, isMain, isMaking, position, orientation, Blocks.FURNACE.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, orientation.front()), timer, timerMultiplier, debugMode);
     }

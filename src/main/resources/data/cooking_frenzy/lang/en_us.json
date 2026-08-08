@@ -20,6 +20,8 @@
   "cooking_frenzy.malfunctions.freezer_maintenance.maintenance_guy": "Maintenance Guy: ",
   "cooking_frenzy.malfunctions.freezer_maintenance.dialog": "%sYikes, looks like the door wiring is all messed up. Could you give me some %s to fix it?",
   "cooking_frenzy.malfunctions.freezer_maintenance.dialog2": "%sThe freezer should be fixed now. Thanks for the help!",
+  "cooking_frenzy.malfunctions.kitchen_fire": "Kitchen Fire",
+  "cooking_frenzy.malfunctions.kitchen_fire.desc": "Make splash potions of water to extinguish the fire!",
 
   "cooking_frenzy.tutorial": "Tutorial",
   "cooking_frenzy.tutorial.open_failed": "Tutorial failed to open",
