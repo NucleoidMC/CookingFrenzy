@@ -18,8 +18,7 @@ This way players can more accurately prepare for the upcoming recipes rather tha
 Bugs:
 
 Malfunctions:
-Kitchen fire
-disables oven, you have to put out all the fires with splash potion of water
+
 Upgrade Ideas:
 Tidier Freezer
 Increases the amount of snowballs that can be stored to exactly 10 (single use)

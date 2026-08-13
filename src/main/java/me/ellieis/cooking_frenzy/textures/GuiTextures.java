@@ -14,6 +14,7 @@ import static me.ellieis.cooking_frenzy.textures.UiResourceCreator.icon16;
 
 public class GuiTextures {
     public static final Function<Component, Component> FARMER_SHOP = background("farmer_shop");
+    public static final Function<Component, Component> SHOP = background("shop");
 
     public static void register() {
         ResourcePackExtras.forDefault().addBridgedModelsFolder(identifier("sgui"));
