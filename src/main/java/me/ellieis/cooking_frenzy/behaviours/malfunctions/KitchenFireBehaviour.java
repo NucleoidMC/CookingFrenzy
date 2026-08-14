@@ -8,12 +8,17 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
 import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.player.PlayerChatEvent;
+import xyz.nucleoid.stimuli.event.projectile.ProjectileHitEvent;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -44,9 +49,33 @@ public class KitchenFireBehaviour extends BaseBehaviour implements MalfunctionBe
     @Override
     protected void setupEvents() {
         activity.listen(GameActivityEvents.TICK, this::onTick);
+        activity.listen(ProjectileHitEvent.BLOCK, this::onProjectileHit);
+        activity.listen(ProjectileHitEvent.ENTITY, this::onProjectileHit);
         if (this.debugMode) {
             activity.listen(PlayerChatEvent.EVENT, this::onChat);
         }
+    }
+
+    private EventResult onProjectileHit(Projectile projectile, BlockHitResult hitResult) {
+        if (projectile.is(EntityTypes.SPLASH_POTION)) {
+            for (BlockPos fireSpot : fireSpots) {
+                if (fireSpot.distSqr(hitResult.getBlockPos()) <= 7) {
+                    game.level.setBlockAndUpdate(fireSpot, Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
+        return EventResult.PASS;
+    }
+
+    private EventResult onProjectileHit(Projectile projectile, EntityHitResult hitResult) {
+        if (projectile.is(EntityTypes.SPLASH_POTION)) {
+            for (BlockPos fireSpot : fireSpots) {
+                if (fireSpot.distSqr(hitResult.getEntity().blockPosition()) <= 5) {
+                    game.level.setBlockAndUpdate(fireSpot, Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
+        return EventResult.PASS;
     }
 
     private void onTick() {
