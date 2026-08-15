@@ -30,6 +30,7 @@ import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.decoration.Mannequin;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.item.DyeColor;
@@ -58,6 +59,8 @@ import xyz.nucleoid.stimuli.event.block.BlockDropItemsEvent;
 import xyz.nucleoid.stimuli.event.block.BlockPlaceEvent;
 import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
 import xyz.nucleoid.stimuli.event.entity.EntityUseEvent;
+import xyz.nucleoid.stimuli.event.item.ItemUseEvent;
+import xyz.nucleoid.stimuli.util.SlotHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,6 +148,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
 
     protected void setupEvents() {
         activity.listen(EntityUseEvent.EVENT, this::onEntityUse);
+        activity.listen(ItemUseEvent.EVENT, this::onItemUse);
         activity.listen(BlockPlaceEvent.AFTER, this::onBlockPlace);
         activity.listen(BlockBreakEvent.EVENT, this::onBlockBreak);
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
@@ -286,6 +290,15 @@ public class FarmingBehaviour extends DisableableBehaviour {
         return EventResult.PASS;
     }
 
+    private InteractionResult onItemUse(ServerPlayer player, InteractionHand hand) {
+        if (player.getItemInHand(hand).getItem().equals(Items.EGG)) {
+            // a lot of interactions accidentally makes you throw the egg
+            // best to disable it tbh
+            SlotHelper.updateSlot(player, SlotHelper.getHandSlot(player, hand));
+            return InteractionResult.FAIL;
+        }
+        return InteractionResult.PASS;
+    }
     private void increasePlantAge(PlantInfo info) {
         BlockState state = this.level.getBlockState(info.pos());
         if (isCrop(state.getBlock())) {

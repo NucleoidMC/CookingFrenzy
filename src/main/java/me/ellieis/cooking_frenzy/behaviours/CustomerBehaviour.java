@@ -8,6 +8,7 @@ import me.ellieis.cooking_frenzy.events.CustomerServedEvent;
 import me.ellieis.cooking_frenzy.events.CustomerSpawnEvent;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.gamestate.orders.BaseOrder;
+import me.ellieis.cooking_frenzy.gamestate.orders.Order;
 import me.ellieis.cooking_frenzy.map.Active;
 import me.ellieis.cooking_frenzy.map.Map;
 import me.ellieis.cooking_frenzy.map.MapWithCustomer;
@@ -59,7 +60,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
     public int customerTimeout;
     public int orderPenalty;
     public boolean firstOrderSet = false;
-    public BaseOrder firstOrder = null;
+    public Order firstOrder = null;
     boolean spawnCustomersAutomatically;
     public CustomerBehaviour(GameSpace gameSpace, GameActivity activity, CookingFrenzyPhase<T> game, int timeForCustomerSpawn, int customerTimeout, boolean spawnCustomersAutomatically) {
         super(gameSpace, activity, game.debugMode);
@@ -112,7 +113,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
 
     private void onTick() {
         if (firstOrderSet && firstOrder != null) {
-            if (firstOrder.food().equals(Items.BREAD)) {
+            if (firstOrder.isCorrectOrder(Items.BREAD.getDefaultInstance())) {
                 this.game.gameState = this.game.gameState.incrementMoney(40);
                 this.firstOrder = null;
             }
@@ -287,7 +288,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
             if (customer.currentOrder == null || !customer.interactible) continue;
             int maxTime = customer.currentOrder.timeLimit();
             int currentTime = customer.timeout;
-            orders.add(new AvailableOrder(maxTime, currentTime, customer.currentOrder.food().getDefaultInstance().getItemName()));
+            orders.add(new AvailableOrder(maxTime, currentTime, customer.currentOrder.name()));
         }
         return orders;
     }

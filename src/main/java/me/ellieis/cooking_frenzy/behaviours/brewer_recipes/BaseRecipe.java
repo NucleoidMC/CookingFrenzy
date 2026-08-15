@@ -6,11 +6,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 
 public record BaseRecipe(PotionContents basePotion, ItemStack ingredient, ItemStack result) implements PotionRecipe {
     public BaseRecipe(Holder<Potion> potion, ItemStack ingredient, ItemStack result) {
         this(new PotionContents(potion), ingredient, result);
+    }
+    public BaseRecipe(Holder<Potion> potion, ItemStack ingredient, Holder<Potion> resultPotion) {
+        ItemStack item = Items.POTION.getDefaultInstance().copy();
+        item.set(DataComponents.POTION_CONTENTS, new PotionContents(resultPotion));
+        this(new PotionContents(potion), ingredient, item);
     }
 
     public ItemStack basePotionDisplay() {

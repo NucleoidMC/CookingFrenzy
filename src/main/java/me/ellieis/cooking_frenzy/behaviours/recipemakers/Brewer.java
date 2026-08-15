@@ -77,7 +77,7 @@ public class Brewer extends RecipeMaker {
     @Override
     public void unlock(ServerLevel level) {
         super.unlock(level);
-        Vec3 basePos = Vec3.atCenterOf(brewerRecipePos);
+        Vec3 basePos = Vec3.atCenterOf(brewerRecipePos).add(0, 0.5, 0);
         float yOffset = 0;
         Transformation scale = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.4f, 0.4f, 0.1f), new Quaternionf());
         for (PotionRecipe recipe : BrewerRecipes.recipes) {

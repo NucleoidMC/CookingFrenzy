@@ -6,6 +6,7 @@ import me.ellieis.cooking_frenzy.behaviours.CustomerBehaviour;
 import me.ellieis.cooking_frenzy.events.CustomerOrderTakenEvent;
 import me.ellieis.cooking_frenzy.events.CustomerSitEvent;
 import me.ellieis.cooking_frenzy.gamestate.orders.BaseOrder;
+import me.ellieis.cooking_frenzy.gamestate.orders.Order;
 import me.ellieis.cooking_frenzy.gamestate.orders.Orders;
 import me.ellieis.cooking_frenzy.map.Active;
 import me.ellieis.cooking_frenzy.mixins.MannequinAccessor;
@@ -46,7 +47,7 @@ public class Customer extends PathfinderNPC{
     ArmorStand seatEntity;
     boolean hasReachedSeat = false;
     int recipeTier;
-    public BaseOrder currentOrder = null;
+    public Order currentOrder = null;
     Display.ItemDisplay orderDisplay;
     public boolean interactible = false;
     public boolean beingLookedAt = false;
@@ -173,7 +174,7 @@ public class Customer extends PathfinderNPC{
                 this.level.playSound(null, this.entity.blockPosition(), SoundEvents.VILLAGER_AMBIENT, SoundSource.PLAYERS);
                 this.orderDisplay.teleportTo(this.level, this.entity.getX(), this.entity.getY() + 2, this.entity.getZ(), Set.of(), 0, 0, false);
                 this.orderDisplay.setBillboardConstraints(Display.BillboardConstraints.CENTER);
-                this.orderDisplay.setItemStack(this.currentOrder.food().getDefaultInstance());
+                this.orderDisplay.setItemStack(this.currentOrder.displayStack());
                 this.orderDisplay.setItemTransform(ItemDisplayContext.GROUND);
                 this.level.addFreshEntity(this.orderDisplay);
                 this.timeout = Math.round(this.currentOrder.timeLimit() / this.orderAngerRateMultiplier);
@@ -181,7 +182,7 @@ public class Customer extends PathfinderNPC{
                     System.out.println("Customer order timeout: " + this.timeout);
                 }
             } else if (!item.isEmpty()) {
-                if (item.getItem() == this.currentOrder.food()) {
+                if (this.currentOrder.isCorrectOrder(item)) {
                     this.interactible = false;
                     this.level.playSound(null, this.entity.blockPosition(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.PLAYERS);
                     item.shrink(1);

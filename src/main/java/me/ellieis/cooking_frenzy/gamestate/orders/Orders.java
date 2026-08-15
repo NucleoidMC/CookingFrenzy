@@ -1,8 +1,10 @@
 package me.ellieis.cooking_frenzy.gamestate.orders;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Orders {
     // time limit is in seconds, not ticks
-    public static ArrayList<BaseOrder> TIER1 = new ArrayList<>(List.of(
+    public static ArrayList<Order> TIER1 = new ArrayList<>(List.of(
             BaseOrder.inSeconds(Items.COOKED_PORKCHOP, 150, 1),
             BaseOrder.inSeconds(Items.COOKED_CHICKEN, 150, 1),
             BaseOrder.inSeconds(Items.BREAD, 180, 1, 90),
@@ -21,7 +23,7 @@ public class Orders {
             BaseOrder.inSeconds(Items.POTION, 180, 1),
             BaseOrder.inSeconds(Items.EGG, 100, 1)
     ));
-    public static ArrayList<BaseOrder> TIER2 = new ArrayList<>(List.of(
+    public static ArrayList<Order> TIER2 = new ArrayList<>(List.of(
             BaseOrder.inSeconds(Items.MELON_SLICE, 180, 2),
             BaseOrder.inSeconds(Items.GOLDEN_CARROT, 240, 2),
             BaseOrder.inSeconds(Items.MILK_BUCKET, 210, 2),
@@ -29,13 +31,15 @@ public class Orders {
             BaseOrder.inSeconds(Items.PUMPKIN_PIE, 180, 2),
             BaseOrder.inSeconds(Items.COOKIE, 180, 2),
             BaseOrder.inSeconds(Items.COOKED_BEEF, 150, 2),
-            BaseOrder.inSeconds(Items.HONEY_BOTTLE, 210, 2)
+            BaseOrder.inSeconds(Items.HONEY_BOTTLE, 210, 2),
+            PotionOrder.inSeconds(Potions.HEALING, 210, 2, 90, Component.translatable("cooking_frenzy.potions.beetroot_juice")),
+            PotionOrder.inSeconds(Potions.FIRE_RESISTANCE, 210, 2, 90, Component.translatable("cooking_frenzy.potions.carrot_juice"))
             ));
-    public static ArrayList<BaseOrder> TIER3 = new ArrayList<>(List.of(
-            BaseOrder.inSeconds(Items.CAKE, 270, 3, 200),
+    public static ArrayList<Order> TIER3 = new ArrayList<>(List.of(
+            BaseOrder.inSeconds(Items.CAKE, 320, 3, 200),
             BaseOrder.inSeconds(Items.BEETROOT_SOUP, 180, 3, 90)
             ));
-    public static BaseOrder random(int tier, RandomSource random) {
+    public static Order random(int tier, RandomSource random) {
         int tier1Chance = 0;
         int tier2Chance = 0;
         int tier3Chance = 0;
@@ -54,14 +58,14 @@ public class Orders {
             tier3Chance = 20;
         }
 
-        WeightedList.Builder<BaseOrder> builder = new WeightedList.Builder<BaseOrder>();
-        for (BaseOrder baseOrder : TIER1) {
+        WeightedList.Builder<Order> builder = new WeightedList.Builder<Order>();
+        for (Order baseOrder : TIER1) {
             builder.add(baseOrder, tier1Chance);
         }
-        for (BaseOrder baseOrder : TIER2) {
+        for (Order baseOrder : TIER2) {
             builder.add(baseOrder, tier2Chance);
         }
-        for (BaseOrder baseOrder : TIER3) {
+        for (Order baseOrder : TIER3) {
             builder.add(baseOrder, tier3Chance);
         }
 

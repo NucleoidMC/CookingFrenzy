@@ -14,6 +14,8 @@ import java.util.List;
 public class BrewerRecipes {
     public static ArrayList<PotionRecipe> recipes = new ArrayList<>(List.of(
             new BaseRecipe(Potions.WATER, Items.SUGAR.getDefaultInstance(), Items.HONEY_BOTTLE.getDefaultInstance()),
+            new BaseRecipe(Potions.WATER, Items.CARROT.getDefaultInstance(), Potions.FIRE_RESISTANCE),
+            new BaseRecipe(Potions.WATER, Items.BEETROOT.getDefaultInstance(), Potions.HEALING),
             new SplashRecipe()
     ));
 
