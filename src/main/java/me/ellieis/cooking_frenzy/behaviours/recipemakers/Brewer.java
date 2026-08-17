@@ -7,6 +7,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -30,15 +31,19 @@ import java.util.List;
 public class Brewer extends RecipeMaker {
     TemplateRegion potionSlot;
     TemplateRegion brewingSlot;
-    BlockPos brewerRecipePos;
+    BlockPos recipeListPos;
     BlockPos result;
     Result currentRecipe = null;
     public RecipeMakerType recipeMakerType = RecipeMakerType.BREWER;
-    public Brewer(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, TemplateRegion potionSlot, TemplateRegion brewingSlot, BlockPos brewerRecipePos, BlockPos result, FrontAndTop orientation, int timer, float timerMultiplier, boolean debugMode) {
+    AnimationState animationState = AnimationState.NONE;
+    Vec3 splashParticleOffset = new Vec3(0, 0, 0);
+    Vec3 smokeParticleOffset = new Vec3(0, 0, 0);
+    float smokeSinCount = 0;
+    public Brewer(boolean isUnlocked, boolean isMain, boolean isMaking, BlockPos position, TemplateRegion potionSlot, TemplateRegion brewingSlot, BlockPos recipeListPos, BlockPos result, FrontAndTop orientation, int timer, float timerMultiplier, boolean debugMode) {
         super(isUnlocked, isMain, isMaking, position, orientation, null, position.relative(orientation.front()), position.relative(orientation.front()).below(), Blocks.POLISHED_TUFF.defaultBlockState(), timer, timerMultiplier, debugMode);
         this.potionSlot = potionSlot;
         this.brewingSlot = brewingSlot;
-        this.brewerRecipePos = brewerRecipePos;
+        this.recipeListPos = recipeListPos;
         this.result = result;
     }
 
@@ -77,7 +82,7 @@ public class Brewer extends RecipeMaker {
     @Override
     public void unlock(ServerLevel level) {
         super.unlock(level);
-        Vec3 basePos = Vec3.atCenterOf(brewerRecipePos).add(0, 0.5, 0);
+        Vec3 basePos = Vec3.atCenterOf(recipeListPos).add(0, 0.5, 0);
         float yOffset = 0;
         Transformation scale = new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.4f, 0.4f, 0.1f), new Quaternionf());
         for (PotionRecipe recipe : BrewerRecipes.recipes) {
@@ -116,14 +121,53 @@ public class Brewer extends RecipeMaker {
             ItemStack item = BrewerRecipes.getResult(currentRecipe.potion(), currentRecipe.recipe());
             Vec3 pos = Vec3.atCenterOf(result);
             level.addFreshEntity(new ItemEntity(level, pos.x(), pos.y(), pos.z(), item));
-            level.playSound(null, this.position, SoundEvents.ARROW_SHOOT, SoundSource.BLOCKS, 1, 1.8f);
+            level.playSound(null, this.position, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.BLOCKS, 1, 1);
+            level.sendParticles(ParticleTypes.EXPLOSION, pos.x(), pos.y(), pos.z(), 10, 0.1, 0.1 ,0.1, 0.01);
             level.setBlock(this.buttonPos, Blocks.SPRUCE_BUTTON.defaultBlockState().setValue(BlockStateProperties.POWERED, false).setValue(HorizontalDirectionalBlock.FACING, this.orientation.front()), 2);
+            animationState = AnimationState.NONE;
+            smokeParticleOffset = Vec3.ZERO;
+            splashParticleOffset = Vec3.ZERO;
+            smokeSinCount = 0;
         }
     }
 
     public void internalLoop(ServerLevel level) {
-        if (this.timer % 20 == 0) {
-            level.playSound(null, this.position, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1, 0.5f);
+        if (this.timer % 2 == 0) {
+            if (this.timer % 10 == 0) {
+                level.playSound(null, result, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.BLOCKS, 1, 1);
+            }
+            if (animationState == AnimationState.RISING) {
+                splashParticleOffset = splashParticleOffset.add(0, 0.1, 0);
+                if (splashParticleOffset.y() > 3.25) {
+                    animationState = AnimationState.CONVERGING;
+                }
+            } else if (animationState == AnimationState.CONVERGING) {
+                splashParticleOffset = splashParticleOffset.add(0.1, 0, 0);
+                if (splashParticleOffset.x() > 2.3) {
+                    animationState = AnimationState.FALLING;
+                }
+            } else if (animationState == AnimationState.FALLING) {
+                if (splashParticleOffset.y() > 0) {
+                    splashParticleOffset = splashParticleOffset.subtract(0, 0.1, 0);
+                } else {
+                    if (this.timer < 20) {
+                        splashParticleOffset = splashParticleOffset.subtract(0, 0.2, 0);
+                    } else {
+                        smokeSinCount += 0.4f;
+                        smokeParticleOffset = new Vec3(Math.sin(smokeSinCount), 3, Math.cos(smokeSinCount));
+                        Vec3 pos = Vec3.atCenterOf(result).add(smokeParticleOffset);
+                        level.sendParticles(ParticleTypes.FLAME, pos.x(), pos.y(), pos.z(), 10, 0.1, 0.1, 0.1, 0);
+                        if (this.timer % 10 == 0) {
+                            level.playSound(null, result, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 1, 1);
+                        }
+                    }
+                }
+            }
+
+            Vec3 potionPos = potionSlot.getBounds().center().add(-splashParticleOffset.x(), Math.min(3, splashParticleOffset.y()), splashParticleOffset.z());
+            Vec3 brewingPos = brewingSlot.getBounds().center().add(splashParticleOffset);
+            level.sendParticles(ParticleTypes.SPLASH, potionPos.x(), potionPos.y(), potionPos.z(), 10, 0.1, 0.1, 0.1, 0);
+            level.sendParticles(ParticleTypes.SPLASH, brewingPos.x(), brewingPos.y(), brewingPos.z(), 10, 0.1, 0.1, 0.1, 0);
         }
     }
 
@@ -136,6 +180,7 @@ public class Brewer extends RecipeMaker {
                 this.timer = 15 * SharedConstants.TICKS_PER_SECOND;
                 this.maxTimer = timer;
                 this.isMaking = true;
+                this.animationState = AnimationState.RISING;
                 level.setBlock(this.buttonPos, Blocks.SPRUCE_BUTTON.defaultBlockState().setValue(BlockStateProperties.POWERED, true).setValue(HorizontalDirectionalBlock.FACING, this.orientation.front()), 2);
             }
         }
@@ -145,5 +190,13 @@ public class Brewer extends RecipeMaker {
         boolean isValid() {
             return potion != null && recipe != null;
         }
+    }
+
+    enum AnimationState {
+        NONE,
+        RISING,
+        CONVERGING,
+        FALLING
+
     }
 }

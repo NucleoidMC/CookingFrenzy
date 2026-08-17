@@ -34,6 +34,8 @@ import java.util.function.Supplier;
 
 import static me.ellieis.cooking_frenzy.CookingFrenzy.identifier;
 
+// patbox truly works in ways that modern science cannot comprehend
+// thanks patbox :D
 public class UiResourceCreator {
     public static final String BASE_MODEL = "minecraft:item/generated";
     public static final String X32_MODEL = "cooking_frenzy:sgui/button_32";
