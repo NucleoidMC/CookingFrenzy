@@ -1,5 +1,6 @@
 package me.ellieis.cooking_frenzy.phases;
 
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import me.ellieis.cooking_frenzy.CustomSounds;
@@ -9,7 +10,6 @@ import me.ellieis.cooking_frenzy.gamestate.GameState;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.BaseUpgrade;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.DebtUpgrade;
 import me.ellieis.cooking_frenzy.gamestate.upgrades.Upgrades;
-import me.ellieis.cooking_frenzy.map.Active;
 import me.ellieis.cooking_frenzy.map.Setup;
 import me.ellieis.cooking_frenzy.scheduler.CountdownTask;
 import me.ellieis.cooking_frenzy.scheduler.Scheduler;
@@ -18,7 +18,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,6 +53,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+
+import static me.ellieis.cooking_frenzy.textures.GuiTextures.CHECKMARK;
+import static me.ellieis.cooking_frenzy.textures.GuiTextures.REFRESH;
 
 public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements PhaseWithState {
     ArrayList<BaseUpgrade> availableUpgrades = new ArrayList<>();
@@ -163,7 +165,8 @@ public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements Pha
                     upgrade.onBuy(this);
                     for (ServerPlayer gameSpacePlayer : gameSpace.getPlayers()) {
                         PlayerUtil.playSoundToPlayer(gameSpacePlayer, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
-                        gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.upgrades.selected", upgrade.name.copy().withStyle(style -> style.withBold(true).withColor(ChatFormatting.GREEN).withHoverEvent(new HoverEvent.ShowText(upgrade.desc)))));
+                        gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.upgrades.selected", upgrade.name.copy().withStyle(style -> style.withBold(true).withColor(ChatFormatting.GREEN))));
+                        gameSpacePlayer.sendSystemMessage(upgrade.desc.copy().withStyle(ChatFormatting.DARK_GRAY));
                         if (gameSpacePlayer.hasContainerOpen()) {
                             gameSpacePlayer.closeContainer();
                             openDebuffGui(player);
@@ -176,10 +179,43 @@ public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements Pha
             }));
             i++;
         }
-        ItemStack item = new ItemStack(Items.WOOL.green());
-        item.set(DataComponents.CUSTOM_NAME, Component.translatable("cooking_frenzy.upgrades.next"));
-        ui.setSlot(8, GuiElementBuilder.from(item).setCallback(() -> {
+        GuiElementBuilder skip;
+        GuiElementBuilder reroll;
+        if (PolymerResourcePackUtils.hasMainPack(player)) {
+            skip = CHECKMARK.get();
+            reroll = REFRESH.get();
+        } else {
+            ItemStack item = new ItemStack(Items.WOOL.green());
+            skip = GuiElementBuilder.from(item);
+            item = new ItemStack(Items.WOOL.blue());
+            reroll = GuiElementBuilder.from(item);
+        }
+
+        skip.setName(Component.translatable("cooking_frenzy.upgrades.next"));
+        int val = Math.max(30, this.gameState.money() / 6);
+        reroll.setName(Component.translatable("cooking_frenzy.upgrades.reroll", val));
+
+        ui.setSlot(0, reroll.setCallback(() -> {
+            if (this.gameState.money() - this.minMoney >= val) {
+                this.gameState = this.gameState.decrementMoney(val);
+                this.availableUpgrades.clear();
+                this.availableUpgrades.addAll(List.of(Upgrades.getRandomUpgrade(this.gameState), Upgrades.getRandomUpgrade(this.gameState), Upgrades.getRandomUpgrade(this.gameState)));
+                updateSidebar();
+                PlayerUtil.playSoundToPlayer(player, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
+                for (ServerPlayer gameSpacePlayer : gameSpace.getPlayers()) {
+                    if (gameSpacePlayer.hasContainerOpen()) {
+                        gameSpacePlayer.closeContainer();
+                        openModifierGui(gameSpacePlayer);
+                    }
+                }
+            } else {
+                player.connection.send(new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(CustomSounds.CUSTOMER_LEAVE)), SoundSource.AMBIENT, player.getX(), player.getY(), player.getZ(), 1, 1, player.level().getSeed()));
+            }
+        }));
+
+        ui.setSlot(8, skip.setCallback(() -> {
             this.pickedUpgrade = true;
+            display.setText(Component.translatable("cooking_frenzy.debuffs.title"));
             for (ServerPlayer gameSpacePlayer : gameSpace.getPlayers()) {
                 PlayerUtil.playSoundToPlayer(gameSpacePlayer, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
                 gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.upgrades.no_selection"));
@@ -204,7 +240,8 @@ public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements Pha
                 debuff.onBuy(this);
                 for (ServerPlayer gameSpacePlayer : gameSpace.getPlayers()) {
                     PlayerUtil.playSoundToPlayer(gameSpacePlayer, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.UI, 1, 1);
-                    gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.debuffs.selected", debuff.name.copy().withStyle(style -> style.withBold(true).withColor(ChatFormatting.RED).withHoverEvent(new HoverEvent.ShowText(debuff.desc)))));
+                    gameSpacePlayer.sendSystemMessage(Component.translatable("cooking_frenzy.debuffs.selected", debuff.name.copy().withStyle(style -> style.withBold(true).withColor(ChatFormatting.RED))));
+                    gameSpacePlayer.sendSystemMessage(debuff.desc.copy().withStyle(ChatFormatting.DARK_GRAY));
                     if (gameSpacePlayer.hasContainerOpen()) {
                         gameSpacePlayer.closeContainer();
                     }

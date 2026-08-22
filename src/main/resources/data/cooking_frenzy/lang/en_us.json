@@ -77,6 +77,7 @@
   "cooking_frenzy.upgrades.selected": "Upgrade Selected: %s",
   "cooking_frenzy.upgrades.no_selection": "No Upgrade Selected",
   "cooking_frenzy.upgrades.next": "Skip Upgrades",
+  "cooking_frenzy.upgrades.reroll": "Reroll Upgrades ($%s)",
   "cooking_frenzy.upgrades.hotbar_slots": "Pants With Pockets",
   "cooking_frenzy.upgrades.hotbar_slots.desc": "Increase your hotbar slots by %s",
   "cooking_frenzy.upgrades.crafter_speed": "More Efficient cogs",

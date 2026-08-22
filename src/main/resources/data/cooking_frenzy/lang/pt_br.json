@@ -71,6 +71,7 @@
   "cooking_frenzy.upgrades.selected": "Upgrade Selecionado: %s",
   "cooking_frenzy.upgrades.no_selection": "Nenhum upgrade selecionado",
   "cooking_frenzy.upgrades.next": "Pular Upgrades",
+  "cooking_frenzy.upgrades.reroll": "Rolar Upgrades Novamente ($%s)",
   "cooking_frenzy.upgrades.hotbar_slots": "Bolsos Extras",
   "cooking_frenzy.upgrades.hotbar_slots.desc": "Aumente o numero de slots por %s",
   "cooking_frenzy.upgrades.crafter_speed": "Engrenagens Mais Eficientes",

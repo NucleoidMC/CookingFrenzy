@@ -55,7 +55,8 @@ public class Upgrades {
                     Component.translatable("cooking_frenzy.upgrades.shop_queue.desc"),
                     GameModifiers.shopDeliveryQueue,
                     1,
-                    75)
+                    75),
+            new DebtUpgrade()
     ));
 
     public static ArrayList<BaseUpgrade> debuffs = new ArrayList<>(List.of(

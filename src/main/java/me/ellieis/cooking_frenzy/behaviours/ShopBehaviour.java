@@ -140,7 +140,7 @@ public class ShopBehaviour extends BaseBehaviour {
         SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x6, player, false);
         gui.setTitle(GuiTextures.SHOP.apply(Component.empty()));
         int baseIndex;
-        for (int i = 1; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             baseIndex = i * 18;
             baseIndex += 1;
             for (ShopItem shopItem : items.get(i)) {
