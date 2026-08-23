@@ -1,5 +1,6 @@
 package me.ellieis.cooking_frenzy.behaviours.extra;
 
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import me.ellieis.cooking_frenzy.CustomSounds;
@@ -63,7 +64,9 @@ public class Farmer {
             return;
         }
         SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x6, player, false);
-        gui.setTitle(GuiTextures.FARMER_SHOP.apply(Component.empty()));
+        if (PolymerResourcePackUtils.hasMainPack(player)) {
+            gui.setTitle(GuiTextures.FARMER_SHOP.apply(Component.empty()));
+        }
         for (int i = 0; i < 4; i++) {
             int baseIndex = (i + 1) * 9;
             baseIndex += 4;
@@ -72,7 +75,7 @@ public class Farmer {
                     baseIndex++;
                     continue;
                 }
-                gui.setSlot(baseIndex, GuiElementBuilder.from(item.displayItem()).setCallback(() -> {
+                gui.setSlot(baseIndex, GuiElementBuilder.from((PolymerResourcePackUtils.hasMainPack(player) ? item.displayItem() : item.item())).setCallback(() -> {
                     buyItem(player, item);
                 }));
                 baseIndex++;

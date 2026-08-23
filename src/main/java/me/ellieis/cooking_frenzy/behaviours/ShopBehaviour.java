@@ -1,5 +1,6 @@
 package me.ellieis.cooking_frenzy.behaviours;
 
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import me.ellieis.cooking_frenzy.CustomSounds;
@@ -138,7 +139,9 @@ public class ShopBehaviour extends BaseBehaviour {
             return;
         }
         SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x6, player, false);
-        gui.setTitle(GuiTextures.SHOP.apply(Component.empty()));
+        if (PolymerResourcePackUtils.hasMainPack(player)) {
+            gui.setTitle(GuiTextures.SHOP.apply(Component.empty()));
+        }
         int baseIndex;
         for (int i = 0; i < 3; i++) {
             baseIndex = i * 18;
