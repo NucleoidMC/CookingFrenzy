@@ -407,9 +407,9 @@ public class CookingFrenzyActive extends CookingFrenzyPhase<Active> implements P
         player.setHealth(20);
         player.getFoodData().setFoodLevel(20);
         player.getFoodData().setSaturation(5);
-        scheduler.addCountdown(new CountdownTask(time + SharedConstants.TICKS_PER_SECOND * 5, (timePassed -> {
-            player.sendSystemMessage(Component.translatable("cooking_frenzy.respawn_timer", 5 - timePassed), true);
-            if (timePassed >= 5) {
+        scheduler.addCountdown(new CountdownTask(time + SharedConstants.TICKS_PER_SECOND * 20, (timePassed -> {
+            player.sendSystemMessage(Component.translatable("cooking_frenzy.respawn_timer", 20 - timePassed), true);
+            if (timePassed >= 20) {
                 map.spawnPlayer(level, player);
             }
         })));

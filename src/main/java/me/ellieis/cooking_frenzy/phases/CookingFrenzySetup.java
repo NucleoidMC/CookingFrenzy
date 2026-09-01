@@ -97,6 +97,7 @@ public class CookingFrenzySetup extends CookingFrenzyPhase<Setup> implements Pha
             ItemStack item = new ItemStack(Items.BARRIER);
             item.set(DataComponents.CUSTOM_NAME, Component.translatable("cooking_frenzy.setup.exit"));
             player.getInventory().setItem(8, item);
+            player.removeAllEffects();
         }
     }
 

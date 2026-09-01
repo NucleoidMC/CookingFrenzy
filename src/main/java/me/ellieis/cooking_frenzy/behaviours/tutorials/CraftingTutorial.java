@@ -54,6 +54,9 @@ public class CraftingTutorial extends BaseTutorial {
         if (stallingCamera) {
             tutorial.timeUntilAngleEnds = 999;
         }
+        if (game.gameState.money() <= 30) {
+            game.gameState = game.gameState.incrementMoney(30);
+        }
         if (checkingForItemsBought) {
             for (ServerPlayer player : gameSpace.getPlayers().participants()) {
                 player.sendSystemMessage(
