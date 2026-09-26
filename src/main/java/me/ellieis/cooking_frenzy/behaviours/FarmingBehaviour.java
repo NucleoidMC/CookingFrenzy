@@ -310,13 +310,13 @@ public class FarmingBehaviour extends DisableableBehaviour {
                 // cocoa or stem
                 if (block.equals(Blocks.COCOA)) {
                     if (state.getValue(BlockStateProperties.AGE_2) < 2) {
-                        bonemealableBlock.performBonemeal(this.level, this.level.getRandom(), info.pos(), state);
+                        bonemealableBlock.performBonemeal(this.level, this.level.getRandom(), info.pos(), state, BonemealSource.INTERACTION);
                     }
                 } else if (block instanceof StemBlock stemBlock) {
                     if (state.getValue(BlockStateProperties.AGE_7) < 7) {
-                        bonemealableBlock.performBonemeal(this.level, this.level.getRandom(), info.pos(), state);
+                        bonemealableBlock.performBonemeal(this.level, this.level.getRandom(), info.pos(), state, BonemealSource.INTERACTION);
                     } else {
-                        if (!stemBlock.isValidBonemealTarget(level, info.pos(), state)){
+                        if (!stemBlock.isValidBonemealTarget(level, info.pos(), state, BonemealSource.INTERACTION)){
                             growStem(stemBlock, info.pos());
                         }
                     }
@@ -427,7 +427,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
             if (state.getBlock().equals(Blocks.GRASS_BLOCK) || state.getBlock().equals(Blocks.SHORT_GRASS)) {
                 return InteractionResult.FAIL;
             } else if (state.getBlock() instanceof StemBlock stemBlock) {
-                if (!stemBlock.isValidBonemealTarget(level, pos, state)){
+                if (!stemBlock.isValidBonemealTarget(level, pos, state, BonemealSource.INTERACTION)){
                     growStem(stemBlock, pos);
                     stack.shrink(1);
                 }

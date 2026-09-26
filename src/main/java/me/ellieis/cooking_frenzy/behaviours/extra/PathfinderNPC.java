@@ -32,7 +32,7 @@ public abstract class PathfinderNPC {
         this.currentNodeId = 0;
         this.entity = new Mannequin(EntityTypes.MANNEQUIN, this.level);
         ((MannequinAccessor) this.entity).cooking_frenzy$setMannequinProfile(skin);
-        this.entity.setInvulnerable(true);
+        this.entity.setPermanentlyInvulnerable(true);
         this.entity.teleportTo(spawnPos.x(), spawnPos.y(), spawnPos.z());
         this.oldPos = this.entity.position();
         this.level.addFreshEntity(this.entity);

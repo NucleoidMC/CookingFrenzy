@@ -7,6 +7,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import xyz.nucleoid.map_templates.TemplateRegion;
 
 import java.util.List;
@@ -23,21 +24,21 @@ public class PressurePlateReader {
     }
     public static void updateSigns(List<TemplateRegion> regions, ServerLevel level, String top, String bottom, boolean isDisabled) {
         int val = getPoweredPlates(regions, level);
-        Component[] text = {
+        List<Component> text = List.of(
                 Component.translatable(top),
                 Component.translatable(bottom, val, regions.size()),
                 Component.empty(),
                 Component.empty()
-        };
-        Component[] filteredText = {
+        );
+        List<Component> filteredText = List.of(
                 Component.empty(),
                 Component.empty(),
                 Component.empty(),
                 Component.empty()
-        };
+        );
         for (TemplateRegion region : regions) {
             if (level.getBlockEntity(BlockPos.containing(region.getBounds().center()).above()) instanceof SignBlockEntity sign) {
-                sign.setText(new SignText(text, filteredText, (isDisabled) ? DyeColor.RED : DyeColor.WHITE, true), true);
+                sign.setText(new SignText(text, filteredText, (isDisabled) ? DyeColor.RED : DyeColor.WHITE, true), SignTextSlot.FRONT);
             }
         }
     }

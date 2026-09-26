@@ -78,7 +78,7 @@ public class CustomerBehaviour<T extends Map> extends BaseBehaviour {
             int yaw = seatRegion.getData().getInt("yaw").orElseThrow();
             mount.setYRot(yaw);
             mount.setInvisible(true);
-            mount.setInvulnerable(true);
+            mount.setPermanentlyInvulnerable(true);
             mount.addTag("NoGravity");
             this.game.level.addFreshEntity(mount);
             this.seats.add(new Seat(seatRegion.getData().getInt("id").orElseThrow(), mount, seatPos, yaw, false));
