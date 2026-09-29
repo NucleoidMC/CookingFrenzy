@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "AbstractFurnaceBlockEntityAccessor",
+    "CropBlockMixin",
     "MannequinAccessor",
     "StemBlockAccessor",
     "TargetBlockMixin"

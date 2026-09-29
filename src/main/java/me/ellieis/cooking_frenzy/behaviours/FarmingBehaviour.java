@@ -1,13 +1,16 @@
 package me.ellieis.cooking_frenzy.behaviours;
 
+import com.mojang.math.Transformation;
 import me.ellieis.cooking_frenzy.behaviours.extra.Farmer;
 import me.ellieis.cooking_frenzy.behaviours.extra.PressurePlateReader;
 import me.ellieis.cooking_frenzy.behaviours.malfunctions.MalfunctionType;
+import me.ellieis.cooking_frenzy.events.CropGrowthEvent;
 import me.ellieis.cooking_frenzy.gamestate.GameModifiers;
 import me.ellieis.cooking_frenzy.mixins.StemBlockAccessor;
 import me.ellieis.cooking_frenzy.phases.CookingFrenzyActive;
 import me.ellieis.cooking_frenzy.scheduler.Scheduler;
 import me.ellieis.cooking_frenzy.scheduler.Task;
+import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -21,10 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.cow.Cow;
@@ -48,6 +48,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import xyz.nucleoid.map_templates.TemplateRegion;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
@@ -62,10 +64,7 @@ import xyz.nucleoid.stimuli.event.entity.EntityUseEvent;
 import xyz.nucleoid.stimuli.event.item.ItemUseEvent;
 import xyz.nucleoid.stimuli.util.SlotHelper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class FarmingBehaviour extends DisableableBehaviour {
     ServerLevel level;
@@ -81,6 +80,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
     boolean isFarmerGlowing = false;
     Minecart minecart;
     ArrayList<PlantInfo> plants = new ArrayList<>();
+    HashMap<BlockPos, Display.TextDisplay> cropGrowthDisplay = new HashMap<>();
     public int cropGrowTime;
     CookingFrenzyActive game;
     BlockPos singlePlayerButtonPos;
@@ -154,6 +154,7 @@ public class FarmingBehaviour extends DisableableBehaviour {
         activity.listen(BlockUseEvent.EVENT, this::onBlockUse);
         activity.listen(BlockDropItemsEvent.EVENT, this::droppedItemModifier);
         activity.listen(GameActivityEvents.TICK, this::onTick);
+        activity.listen(CropGrowthEvent.EVENT, this::onCropGrowth);
     }
 
     public void glowFarmer(boolean isGlowing) {
@@ -192,6 +193,22 @@ public class FarmingBehaviour extends DisableableBehaviour {
         }
         return null;
     }
+
+    private void onCropGrowth(BlockPos pos, int age) {
+        BlockState state = level.getBlockState(pos);
+        CropBlock block = (CropBlock) state.getBlock();
+        if (block.isMaxAge(state)) {
+            Display.TextDisplay display = new Display.TextDisplay(EntityTypes.TEXT_DISPLAY, level);
+            display.setText(Component.literal("!").withStyle(ChatFormatting.GREEN));
+            display.setBackgroundColor(0);
+            display.setPos(Vec3.atCenterOf(pos.above()).subtract(0, 0.25, 0));
+            display.setBillboardConstraints(Display.BillboardConstraints.CENTER);
+            display.setTransformation(new Transformation(new Vector3f(0), new Quaternionf(), new Vector3f(2), new Quaternionf()));
+            level.addFreshEntity(display);
+            cropGrowthDisplay.put(pos, display);
+        }
+    }
+
     private void onTick() {
         Vec3 traderPos = this.trader.position();
         List<Player> nearbyPlayers = this.level.getNearbyEntities(Player.class, TargetingConditions.forNonCombat(), this.trader, AABB.unitCubeFromLowerCorner(traderPos).inflate(10));
@@ -350,9 +367,13 @@ public class FarmingBehaviour extends DisableableBehaviour {
     }
 
     private EventResult onBlockBreak(ServerPlayer serverPlayer, ServerLevel level, BlockPos blockPos) {
-        if (isPlant(level.getBlockState(blockPos).getBlock())) {
+        Block block = level.getBlockState(blockPos).getBlock();
+        if (isPlant(block)) {
             PlantInfo plantToRemove = getPlantByPos(blockPos);
             plants.remove(plantToRemove);
+            if (isCrop(block) && cropGrowthDisplay.containsKey(blockPos)) {
+                cropGrowthDisplay.get(blockPos).remove(Entity.RemovalReason.KILLED);
+            }
         }
         return EventResult.PASS;
     }
